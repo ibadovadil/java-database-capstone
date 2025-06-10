@@ -33,7 +33,7 @@ public class Doctor {
     @NotNull(message = "Password cannot be null")
     @Size(min = 6, message = "Password must be at least 6 characters long")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @Column(name = "password_hash", nullable = false)
+    @Column(name = "password", nullable = false)
     private String password;
 
     @NotNull(message = "Phone number cannot be null")
@@ -43,7 +43,7 @@ public class Doctor {
 
     @ElementCollection
     @CollectionTable(name = "doctor_available_times", joinColumns = @JoinColumn(name = "doctor_id"))
-    @Column(name = "available_time", nullable = false)
+    @Column(name = "available_times", nullable = false)
     private List<String> availableTimes;
 
     public Doctor() {
@@ -95,8 +95,8 @@ public class Doctor {
     }
 
     public void setPhone(String phone) {
-        this.phone = phone;
-    }
+        this.phone = phone.replaceAll("-", "");   
+     }
 
     public List<String> getAvailableTimes() {
         return availableTimes;

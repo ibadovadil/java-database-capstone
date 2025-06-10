@@ -2,7 +2,6 @@ package com.project.back_end.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
@@ -22,31 +21,17 @@ public class Admin {
     @NotNull(message = "Password cannot be null")
     @Size(min = 6, message = "Password must be at least 6 characters long")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @Column(name = "password_hash", nullable = false)
+    @Column(name = "password", nullable = false)
     private String password;
 
-    @NotNull(message = "Email cannot be null")
-    @Email(message = "Email should be valid")
-    @Column(unique = true, nullable = false, length = 100)
-    private String email;
-
-    @NotNull(message = "Full name cannot be null")
-    @Size(max = 100, message = "Full name cannot exceed 100 characters")
-    @Column(name = "full_name", nullable = false, length = 100)
-    private String fullName;
-
-    // Constructors
     public Admin() {
     }
 
-    public Admin(String username, String password, String email, String fullName) {
+    public Admin(String username, String password) {
         this.username = username;
         this.password = password;
-        this.email = email;
-        this.fullName = fullName;
     }
 
-    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -71,29 +56,11 @@ public class Admin {
         this.password = password;
     }
 
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getFullName() {
-        return fullName;
-    }
-
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
-    }
-
     @Override
     public String toString() {
         return "Admin{" +
                 "id=" + id +
                 ", username='" + username + '\'' +
-                ", email='" + email + '\'' +
-                ", fullName='" + fullName + '\'' +
                 '}';
     }
 }
