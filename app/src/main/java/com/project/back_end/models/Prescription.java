@@ -5,7 +5,7 @@ import org.springframework.data.annotation.Id;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-@Document(collection = "prescriptions")
+@Document(collection = "prescription")
 public class Prescription {
 
     @Id
