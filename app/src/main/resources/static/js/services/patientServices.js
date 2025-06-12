@@ -1,3 +1,115 @@
+// import { BASE_API_URL } from '../config.js';
+export const PATIENT_API = '/patient';
+
+
+export async function patientSignup(data) {
+  try {
+    const response = await fetch(`${PATIENT_API}/signup`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.message || 'Registration failed.');
+    }
+
+    return { success: true, message: result.message || 'Registration completed successfully.' };
+
+  } catch (error) {
+    console.error("Patient registration error:", error);
+    return { success: false, message: error.message || 'Network error: Registration failed.' };
+  }
+}
+
+
+export async function patientLogin(data) {
+  try {
+    const response = await fetch(`${PATIENT_API}/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+
+    return response;
+  } catch (error) {
+    console.error("Patient login error:", error);
+    throw error;
+  }
+}
+
+
+export async function getPatientData(token) {
+  const url = `${PATIENT_API}?token=${token}`;
+
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' }
+    });
+
+    if (response.ok) {
+      const patient = await response.json();
+      return patient;
+    } else {
+      console.error('API error while retrieving patient data. Status:', response.status);
+      return null;
+    }
+  } catch (error) {
+    console.error('Network error while retrieving patient data:', error);
+    return null;
+  }
+}
+
+
+export async function getPatientAppointments(id, token, user) {
+  const url = `${PATIENT_API}/${id}/appointments/${user}?token=${token}`;
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' }
+    });
+
+    if (response.ok) {
+      const appointments = await response.json();
+      return appointments;
+    } else {
+      console.error('API error while retrieving appointments. Status:', response.status);
+      return null;
+    }
+  } catch (error) {
+    console.error('Network error while retrieving appointments:', error);
+    return null;
+  }
+}
+
+
+export async function filterAppointments(condition, name, token) {
+  const url = `${PATIENT_API}/filter/${condition}/${name}?token=${token}`;
+
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' }
+    });
+
+    if (response.ok) {
+      const filteredAppointments = await response.json();
+      return filteredAppointments;
+    } else {
+      console.error('API error while filtering appointments. Status:', response.status);
+      alert('An error occurred while filtering appointments. Please try again.');
+      return [];
+    }
+  } catch (error) {
+    console.error('Network error occurred while filtering appointments:', error);
+    alert('Network error: Appointments could not be filtered. Please try again.');
+    return [];
+  }
+}
+
 /*
   Import the base API URL from the config file
   Create a constant named PATIENT_API by appending '/patient' to the base URL

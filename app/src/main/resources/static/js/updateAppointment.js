@@ -1,43 +1,118 @@
-/* 
- Function Overview:
-   - `initializePage()`: Main function that initializes the page by fetching appointment and doctor details and populating the form for the update.
-   - `updateAppointment()`: Updates the appointment details by sending the modified appointment data to the server.
-   - `getDoctors()`: Fetches available doctors to populate the available times for the selected doctor.
+import { getDoctors } from './services/doctorServices.js';
+import { updateAppointment as updateAppointmentService } from './services/appointmentRecordService.js';
+import { selectRole } from './render.js';
 
- Key Variables:
-   - `token`: Token stored in `localStorage` for user authentication. It's required to validate the user's session and permissions.
-   - `appointmentId`, `patientId`, `doctorId`, `patientName`, `doctorName`, `appointmentDate`, `appointmentTime`: All are extracted from the URL parameters. They provide necessary data to pre-fill the form and allow for appointment updates.
-   - `doctor`: The doctor object retrieved from the list of doctors. It contains the available times for scheduling.
-   
- Page Initialization (`initializePage()`):
-   - The page first checks if the `token` and `patientId` are available in `localStorage` or the URL query parameters.
-   - If the `token` or `patientId` is missing, the user is redirected to the patient appointments page (`patientAppointments.html`).
-   
- Fetch Doctors:
-   - `getDoctors()` is called to fetch all doctors. This list helps populate the available times for the selected doctor.
-   - The selected doctor (by `doctorId` from the URL) is found in the list, and if found, their available times are displayed as options in the form dropdown (`appointmentTime`).
-   - If no doctor is found, an error message is shown.
+let token;
+let appointmentId;
+let patientId;
+let doctorId;
+let patientName;
+let doctorName;
+let appointmentDate;
+let appointmentTime;
+let doctor;
 
- Pre-fill Appointment Details:
-   - The form is pre-filled with the `patientName`, `doctorName`, `appointmentDate`, and `appointmentTime` from the URL.
-   - Additionally, the available times for the selected doctor are dynamically added to the time selection dropdown.
+document.addEventListener('DOMContentLoaded', async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    appointmentId = urlParams.get('appointmentId');
+    patientId = urlParams.get('patientId');
+    doctorId = urlParams.get('doctorId');
+    patientName = urlParams.get('patientName');
+    doctorName = urlParams.get('doctorName');
+    appointmentDate = urlParams.get('appointmentDate');
+    appointmentTime = urlParams.get('appointmentTime');
 
- Handle Form Submission:
-   - The form submission (`updateAppointmentForm`) is handled to prevent the default submission behavior using `e.preventDefault()`.
-   - The updated appointment data is compiled, including the selected date and time.
-   - If both the `appointmentDate` and `appointmentTime` are provided, an update request is sent to the server using the `updateAppointment()` function.
-   - If the update is successful, the user is redirected back to the patient appointments page.
-   - If the update fails, an error message is shown, explaining the failure.
+    token = localStorage.getItem('token');
 
- Error Handling:
-   - If any errors occur while fetching the doctor list (`getDoctors()`), an error message is logged, and an alert is shown to the user.
-   - If the form submission is unsuccessful (either due to missing data or server failure), the user is informed via an alert.
+    if (!token || !patientId) {
+        console.error("Authentication token or patient ID missing. Redirecting to patient appointments page.");
+        window.location.href = "/patientAppointments.html";
+        return;
+    }
 
- Redirection and Flow:
-   - If the appointment update is successful, the user is redirected to the patient appointments page.
-   - If the session data (`token` or `patientId`) is missing, the user is redirected to the patient appointments page as a fallback to ensure they can re-authenticate.
+    await initializePage();
 
- Purpose:
-   - This script is used on the page that allows patients to update their existing appointments with a doctor. It ensures the correct data is pre-populated, the form is validated, and the update process is properly handled.
+    const updateAppointmentForm = document.getElementById('updateAppointmentForm');
+    if (updateAppointmentForm) {
+        updateAppointmentForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await handleUpdateAppointmentFormSubmission();
+        });
+    }
+});
 
-*/
+async function initializePage() {
+    const patientNameInput = document.getElementById('patientNameInput');
+    const doctorNameInput = document.getElementById('doctorNameInput');
+    const appointmentDateInput = document.getElementById('appointmentDateInput');
+    const appointmentTimeSelect = document.getElementById('appointmentTimeSelect');
+
+    if (patientNameInput) patientNameInput.value = patientName || '';
+    if (doctorNameInput) doctorNameInput.value = doctorName || '';
+    if (appointmentDateInput) appointmentDateInput.value = appointmentDate || '';
+    if (appointmentTimeSelect) appointmentTimeSelect.value = appointmentTime || '';
+
+    try {
+        const allDoctors = await getDoctors();
+        if (allDoctors && allDoctors.length > 0) {
+            doctor = allDoctors.find(doc => doc.id === doctorId);
+
+            if (doctor && appointmentTimeSelect) {
+                appointmentTimeSelect.innerHTML = '<option value="">Select a time</option>';
+                doctor.availability.forEach(timeSlot => {
+                    const option = document.createElement('option');
+                    option.value = timeSlot;
+                    option.textContent = timeSlot;
+                    appointmentTimeSelect.appendChild(option);
+                });
+                if (appointmentTime) {
+                    appointmentTimeSelect.value = appointmentTime;
+                }
+            } else if (!doctor) {
+                console.error("Selected doctor not found in the fetched list.");
+                alert("Selected doctor details could not be loaded.");
+            }
+        } else {
+            console.error("No doctors found in the system.");
+            alert("No doctors available to load appointment times.");
+        }
+    } catch (error) {
+        console.error("Error fetching doctor list for appointment update:", error);
+        alert("Error loading doctor information. Please try again.");
+    }
+}
+
+async function handleUpdateAppointmentFormSubmission() {
+    const appointmentDateInput = document.getElementById('appointmentDateInput');
+    const appointmentTimeSelect = document.getElementById('appointmentTimeSelect');
+
+    const newAppointmentDate = appointmentDateInput ? appointmentDateInput.value : '';
+    const newAppointmentTime = appointmentTimeSelect ? appointmentTimeSelect.value : '';
+
+    if (!newAppointmentDate || !newAppointmentTime) {
+        alert("Please select both a date and a time for the appointment.");
+        return;
+    }
+
+    const updatedAppointment = {
+        id: appointmentId,
+        patientId: patientId,
+        doctorId: doctorId,
+        appointmentDate: newAppointmentDate,
+        appointmentTime: newAppointmentTime
+    };
+
+    try {
+        const result = await updateAppointmentService(updatedAppointment, token);
+
+        if (result.success) {
+            alert(result.message || "Appointment updated successfully!");
+            window.location.href = "/patientAppointments.html";
+        } else {
+            alert(result.message || "Failed to update appointment. Please try again.");
+        }
+    } catch (error) {
+        console.error("Error updating appointment:", error);
+        alert("An unexpected error occurred during appointment update. Please try again.");
+    }
+}

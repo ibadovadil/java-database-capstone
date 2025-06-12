@@ -1,30 +1,91 @@
-/* 
- Import modules:
-   - getPatientAppointments: Fetches all appointments of a given patient.
-   - createPatientRecordRow: Creates a table row for each appointment entry.
+import { createPatientRecordRow } from './components/patientRecordRow.js';
+import { getPatientAppointments } from './services/patientServices.js';
 
- DOM element references:
-   - tableBody: The body of the table where patient appointments will be listed.
-   - token: Retrieved from localStorage to authorize the API call.
-   - URL parameters: Used to extract the specific `patientId` and `doctorId` to filter data accordingly.
+let tableBody;
+let token;
+let patientId;
+let doctorId;
+let filterDropdown;
 
- Page Initialization:
-   - On DOMContentLoaded, call `initializePage()` to load and display data.
+document.addEventListener('DOMContentLoaded', async () => {
+    tableBody = document.getElementById('patientAppointmentsTableBody');
+    filterDropdown = document.getElementById('filterAppointments');
 
- Fetch appointments:
-   - Ensure the user token exists.
-   - Call `getPatientAppointments()` with the patient ID and token, specifying the user as `"doctor"` to access the correct backend logic.
-   - Filter appointments further by checking if `doctorId` matches the one in the query string.
+    const urlParams = new URLSearchParams(window.location.search);
+    patientId = urlParams.get('patientId');
+    doctorId = urlParams.get('doctorId');
+    token = localStorage.getItem('token');
 
- Render Appointments:
-   - Clear any previous content in the table.
-   - Always make the "Actions" column visible in the table.
-   - If no appointments exist, show a "No Appointments Found" message.
-   - Otherwise, loop through filtered data and render each appointment row using `createPatientRecordRow()`.
+    if (!token || !patientId || !doctorId) {
+        console.error("Authentication token, patient ID, or doctor ID missing. Cannot load patient record.");
+        alert("Authentication error or missing data. Please try again.");
+        window.location.href = "/";
+        return;
+    }
 
- Error Handling:
-   - All major operations are wrapped in try-catch blocks.
-   - Errors are logged to the console for debugging.
-   - Alerts are used to notify the user of failure to load data.
+    if (filterDropdown) {
+        filterDropdown.addEventListener('change', () => {
+            loadAppointments(filterDropdown.value);
+        });
+    }
 
-*/
+    await initializePage();
+});
+
+async function initializePage() {
+    await loadAppointments(filterDropdown ? filterDropdown.value : 'all');
+}
+
+async function loadAppointments(filter) {
+    if (!tableBody) {
+        console.error("Table body not found.");
+        return;
+    }
+    tableBody.innerHTML = '';
+
+    try {
+        const allAppointments = await getPatientAppointments(patientId, token, "doctor");
+
+        if (!allAppointments || allAppointments.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="4" class="text-center text-gray-500">No appointments found.</td></tr>';
+            return;
+        }
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        let filteredAppointments = allAppointments;
+
+        if (filter === "upcoming") {
+            filteredAppointments = allAppointments.filter(app => {
+                const appDate = new Date(app.appointmentDate);
+                appDate.setHours(0, 0, 0, 0);
+                return appDate >= today;
+            });
+        } else if (filter === "past") {
+            filteredAppointments = allAppointments.filter(app => {
+                const appDate = new Date(app.appointmentDate);
+                appDate.setHours(0, 0, 0, 0);
+                return appDate < today;
+            });
+        }
+        filteredAppointments = filteredAppointments.filter(app => app.doctorId === doctorId);
+
+
+        if (filteredAppointments.length === 0) {
+            const message = filter === 'upcoming' ? 'No upcoming appointments found for this patient with this doctor.' : 'No past appointments found for this patient with this doctor.';
+            tableBody.innerHTML = `<tr><td colspan="4" class="text-center text-gray-500">${message}</td></tr>`;
+            return;
+        }
+
+        filteredAppointments.forEach(appointment => {
+            const row = createPatientRecordRow(appointment);
+            tableBody.appendChild(row);
+        });
+
+    } catch (error) {
+        console.error("Error loading patient appointments:", error);
+        alert("Error loading patient appointments. Please try again.");
+        tableBody.innerHTML = '<tr><td colspan="4" class="text-center text-red-500">Error loading appointments. Please try again later.</td></tr>';
+    }
+}

@@ -1,48 +1,124 @@
-/* 
- Import the necessary service functions:
-   - getPatientAppointments: To fetch all appointments of a patient.
-   - getPatientData: To retrieve patient profile data using a stored token.
-   - filterAppointments: To filter the patient's appointments based on criteria.
+import { getAppointments as createAppointmentRow } from './components/appointmentRow.js';
+import { getPatientAppointments, getPatientData, filterAppointments } from './services/patientServices.js';
 
- Initialize important variables:
-   - tableBody: Reference the table body element where appointments will be displayed.
-   - token: Retrieve the authentication token from localStorage.
-   - allAppointments: Array to store all fetched appointment data.
-   - filteredAppointments: Array to store filtered results when searching.
-   - patientId: To hold the ID of the current patient once retrieved.
+let tableBody;
+let token;
+let allAppointments = [];
+let patientId;
 
- Set up the page when it loads:
-   - Wait for the DOM to fully load using the 'DOMContentLoaded' event.
-   - Ensure a token exists; if not, stop the execution.
-   - Use getPatientData() to fetch the current patient's details.
-   - Store the returned patient ID for filtering.
-   - Use getPatientAppointments() to fetch all appointments linked to this patient.
-   - Filter the results by matching the patientId.
-   - Pass the filtered list to the renderAppointments() function.
+document.addEventListener('DOMContentLoaded', async () => {
+  tableBody = document.getElementById('patientAppointmentsTableBody');
+  const searchBar = document.getElementById('searchBar');
+  const filterDropdown = document.getElementById('filterAppointments');
 
- Display appointments in a table:
-   - Clear existing rows in the table body.
-   - Always show the “Actions” column by modifying its CSS if needed.
-   - If no appointments exist, display a single row message like “No Appointments Found.”
-   - If appointments exist:
-     - Loop through each appointment.
-     - Display columns: Patient name ("You"), Doctor name, Date, Time, and Action.
-     - If the appointment is editable (status 0), add an edit icon or button.
-     - Attach an event listener to the edit icon to allow editing the appointment.
+  token = localStorage.getItem('token');
 
- Redirect user to edit their appointment:
-   - When the edit icon is clicked:
-     - Build a URL with query parameters including: 
-       appointmentId, patientId, patientName, doctorName, doctorId, date, and time.
-     - Redirect the user to updateAppointment.html with the prepared query string.
+  if (!token) {
+    console.error("Authentication token missing. Cannot load patient appointments.");
+    window.location.href = "/";
+    return;
+  }
 
-Add filtering functionality for search and dropdown:
-   - Set up listeners on:
-     - A search bar to search by doctor or name.
-     - A filter dropdown (e.g., allAppointments, past, upcoming).
-   - When a filter changes:
-     - Use filterAppointments() service with the search and filter values.
-     - Again, ensure only appointments for the current patientId are included.
-     - Re-render the filtered appointments using renderAppointments().
+  try {
+    const patientData = await getPatientData(token);
+    if (patientData && patientData.id) {
+      patientId = patientData.id;
+    } else {
+      console.error("Patient data could not be retrieved. Cannot load appointments.");
+      alert("Failed to load patient data. Please log in again.");
+      window.location.href = "/";
+      return;
+    }
 
-*/
+    allAppointments = await getPatientAppointments(patientId, token, "patient"); // User as "patient" for patient's own view.
+    allAppointments = allAppointments.filter(app => app.patientId === patientId);
+
+    if (searchBar) {
+      searchBar.addEventListener('input', () => {
+        applyFiltersAndRender();
+      });
+    }
+
+    if (filterDropdown) {
+      filterDropdown.addEventListener('change', () => {
+        applyFiltersAndRender();
+      });
+    }
+
+    applyFiltersAndRender();
+  } catch (error) {
+    console.error("Error during page initialization:", error);
+    alert("An error occurred during page setup. Please try again.");
+    if (tableBody) {
+      tableBody.innerHTML = '<tr><td colspan="5" class="text-center text-red-500">Error loading appointments.</td></tr>';
+    }
+  }
+});
+
+async function applyFiltersAndRender() {
+  const searchBar = document.getElementById('searchBar');
+  const filterDropdown = document.getElementById('filterAppointments');
+
+  const searchText = searchBar ? searchBar.value.toLowerCase().trim() : '';
+  const filterValue = filterDropdown ? filterDropdown.value : 'all';
+
+  let currentFilteredAppointments = allAppointments;
+
+  if (searchText) {
+    currentFilteredAppointments = currentFilteredAppointments.filter(app =>
+      (app.doctorName && app.doctorName.toLowerCase().includes(searchText)) ||
+      (app.patientName && app.patientName.toLowerCase().includes(searchText))
+    );
+  }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  if (filterValue === "upcoming") {
+    currentFilteredAppointments = currentFilteredAppointments.filter(app => {
+      const appDate = new Date(app.appointmentDate);
+      appDate.setHours(0, 0, 0, 0);
+      return appDate >= today;
+    });
+  } else if (filterValue === "past") {
+    currentFilteredAppointments = currentFilteredAppointments.filter(app => {
+      const appDate = new Date(app.appointmentDate);
+      appDate.setHours(0, 0, 0, 0);
+      return appDate < today;
+    });
+  }
+
+  renderAppointments(currentFilteredAppointments);
+}
+
+function renderAppointments(appointmentsToRender) {
+  if (!tableBody) {
+    console.error("Table body not found for rendering.");
+    return;
+  }
+
+  tableBody.innerHTML = '';
+
+  if (!appointmentsToRender || appointmentsToRender.length === 0) {
+    tableBody.innerHTML = '<tr><td colspan="5" class="text-center text-gray-500">No appointments found.</td></tr>';
+    return;
+  }
+
+
+  appointmentsToRender.forEach(appointment => {
+    const isEditable = appointment.status === 0;
+
+    const appointmentDataForDisplay = {
+        id: appointment.id,
+        patientName: "You", 
+        doctorName: appointment.doctorName,
+        appointmentDate: appointment.appointmentDate,
+        appointmentTime: appointment.appointmentTime,
+        isEditable: isEditable 
+    };
+
+    const row = createAppointmentRow(appointmentDataForDisplay);
+    tableBody.appendChild(row);
+
+  });
+}

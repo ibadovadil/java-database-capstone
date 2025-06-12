@@ -1,40 +1,78 @@
-/*
-  Import a utility to generate a table row for each appointment
-  Import the function that retrieves all appointment records for the logged-in user
+import { getAppointments as createAppointmentRow } from './components/appointmentRow.js';
+import { getAllAppointments } from './services/appointmentRecordService.js';
 
+let tableBody;
+let filterDropdown;
 
-  Get a reference to the <tbody> element of the appointments table (where rows will be added)
-  Get a reference to the filter dropdown that allows selection between "upcoming" and "past"
+document.addEventListener('DOMContentLoaded', () => {
+  tableBody = document.getElementById('appointmentRecordTableBody');
+  filterDropdown = document.getElementById('filterAppointments');
 
+  if (filterDropdown) {
+    filterDropdown.addEventListener('change', (event) => {
+      loadAppointments(event.target.value);
+    });
+  }
 
-  Function: loadAppointments
-  Purpose: Load and display appointments based on the selected filter
+  loadAppointments("upcoming");
+});
 
-   Fetch all appointments using getAppointmentRecord()
-   If no appointments are returned:
-    - Show a single table row with the message "No appointments found."
+async function loadAppointments(filter) {
+  if (!tableBody) {
+    console.error("Appointment record table body not found.");
+    return;
+  }
 
-   Create a 'today' date (with time set to 00:00:00 for accurate comparison)
+  tableBody.innerHTML = '';
 
-   Filter the appointments array:
-    - If the filter is "upcoming", keep only appointments with a date >= today
-    - If the filter is "past", keep only appointments with a date < today
+  const token = localStorage.getItem('token');
+  if (!token) {
+    console.error("Authentication token missing. Cannot load appointment records.");
+    tableBody.innerHTML = '<tr><td colspan="5" class="text-center text-red-500">Authentication error. Please log in again.</td></tr>';
+    return;
+  }
 
-   If the filtered list is empty:
-    - Show a message row saying "No upcoming/past appointments found."
+  try {
+    const allAppointments = await getAllAppointments(null, null, token);
 
-   Otherwise, clear the table body
-    - For each filtered appointment:
-      - Create a new row using getAppointments()
-      - Append it to the table
+    if (!allAppointments || allAppointments.length === 0) {
+      tableBody.innerHTML = '<tr><td colspan="5" class="text-center text-gray-500">No appointments found.</td></tr>';
+      return;
+    }
 
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-  Add an event listener to the dropdown menu
-  When the user selects a new filter:
-    - Call loadAppointments with the selected filter value (either 'upcoming' or 'past')
+    let filteredAppointments = [];
+    if (filter === 'upcoming') {
+      filteredAppointments = allAppointments.filter(app => {
+        const appointmentDate = new Date(app.appointmentDate);
+        appointmentDate.setHours(0, 0, 0, 0);
+        return appointmentDate >= today;
+      });
+    } else if (filter === 'past') {
+      filteredAppointments = allAppointments.filter(app => {
+        const appointmentDate = new Date(app.appointmentDate);
+        appointmentDate.setHours(0, 0, 0, 0);
+        return appointmentDate < today;
+      });
+    } else {
+      filteredAppointments = allAppointments;
+    }
 
+    if (filteredAppointments.length === 0) {
+      const message = filter === 'upcoming' ? 'No upcoming appointments found.' : 'No past appointments found.';
+      tableBody.innerHTML = `<tr><td colspan="5" class="text-center text-gray-500">${message}</td></tr>`;
+      return;
+    }
 
-  When the script first runs:
-    - Call loadAppointments("upcoming") to load and show only future appointments by default
+    filteredAppointments.forEach(appointment => {
+      const row = createAppointmentRow(appointment);
+      tableBody.appendChild(row);
+    });
 
-*/
+  } catch (error) {
+    console.error("Error loading appointment records:", error);
+    tableBody.innerHTML = '<tr><td colspan="5" class="text-center text-red-500">Error loading appointment records. Please try again later.</td></tr>';
+  }
+}

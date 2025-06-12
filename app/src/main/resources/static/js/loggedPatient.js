@@ -1,64 +1,179 @@
-/*
-  Import functions to fetch all doctors, filter doctors, and book an appointment
-  Import the function to create doctor cards for display
+// loggedPatient.js
+
+import { getDoctors, filterDoctors, bookAppointment } from './services/doctorServices.js';
+import { createDoctorCard } from './components/doctorCard.js';
 
 
-  When the page is fully loaded (DOMContentLoaded):
-    - Call loadDoctorCards() to fetch and display all doctors initially
+document.addEventListener('DOMContentLoaded', () => {
+    loadDoctorCards();
+
+    const searchBar = document.getElementById("searchBar");
+    const filterTime = document.getElementById("filterTime");
+    const filterSpecialty = document.getElementById("filterSpecialty");
+
+    if (searchBar) {
+        searchBar.addEventListener("input", filterDoctorsOnChange);
+    }
+    if (filterTime) {
+        filterTime.addEventListener("change", filterDoctorsOnChange);
+    }
+    if (filterSpecialty) {
+        filterSpecialty.addEventListener("change", filterDoctorsOnChange);
+    }
+});
 
 
-  Function: loadDoctorCards
-  Purpose: Fetch all doctors from the backend and display them as cards
+async function loadDoctorCards() {
+    const contentDiv = document.getElementById("content");
+    if (!contentDiv) {
+        console.error("Content div not found.");
+        return;
+    }
+    contentDiv.innerHTML = "";
 
-   Call getDoctors() to retrieve doctor data
-   Clear any existing content from the container div
-   Loop through each doctor and:
-     - Create a visual card using createDoctorCard()
-     - Append it to the content container
-   Handle errors (e.g., show console message if fetch fails)
-
-
-  Function: showBookingOverlay
-  Purpose: Display a modal to book an appointment with a selected doctor
-
-   Create a ripple effect at the clicked location for UI feedback
-   Build a modal with:
-     - Pre-filled doctor and patient details (disabled inputs)
-     - Date picker for appointment
-     - Dropdown menu of available time slots
-
-   Append the modal to the document body and animate it
-   Add click listener to the "Confirm Booking" button:
-     - Collect selected date and time
-     - Format the time (extract start time for appointment)
-     - Prepare the appointment object with doctor, patient, and datetime
-     - Use bookAppointment() to send the request to the backend
-     - On success: Show alert, remove modal and ripple
-     - On failure: Show error message to the user
+    try {
+        const doctors = await getDoctors();
+        if (doctors && doctors.length > 0) {
+            renderDoctorCards(doctors);
+        } else {
+            contentDiv.innerHTML = '<p class="text-center text-gray-500">No doctors found in the system.</p>';
+        }
+    } catch (error) {
+        console.error("Error loading doctor cards:", error);
+        contentDiv.innerHTML = '<p class="text-center text-red-500">An error occurred while loading doctors.</p>';
+    }
+}
 
 
-  Add event listeners to:
-    - The search bar (on input)
-    - Time filter dropdown (on change)
-    - Specialty filter dropdown (on change)
+export function showBookingOverlay(event, doctor, patientData) {
+    const ripple = document.createElement('span');
+    ripple.classList.add('ripple');
+    const x = event.clientX - event.target.offsetLeft;
+    const y = event.clientY - event.target.offsetTop;
+    ripple.style.left = `${x}px`;
+    ripple.style.top = `${y}px`;
+    event.target.appendChild(ripple);
 
-  All inputs call filterDoctorsOnChange() to apply the filters dynamically
+    const modal = document.createElement('div');
+    modal.classList.add('fixed', 'inset-0', 'flex', 'items-center', 'justify-center', 'bg-gray-800', 'bg-opacity-75', 'z-50');
+    modal.innerHTML = `
+        <div class="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full relative">
+            <h2 class="text-2xl font-bold mb-4">Book Appointment</h2>
+            <button class="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-3xl font-bold" onclick="this.closest('.fixed').remove(); document.querySelector('.ripple')?.remove();">&times;</button>
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2">Doctor:</label>
+                <input type="text" value="${doctor.name || ''} - ${doctor.specialty || ''}" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" disabled>
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2">Patient:</label>
+                <input type="text" value="${patientData.name || ''} (ID: ${patientData.id || ''})" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" disabled>
+            </div>
+            <div class="mb-4">
+                <label for="appointmentDate" class="block text-gray-700 text-sm font-bold mb-2">Date:</label>
+                <input type="date" id="appointmentDate" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+            <div class="mb-6">
+                <label for="appointmentTime" class="block text-gray-700 text-sm font-bold mb-2">Time:</label>
+                <select id="appointmentTime" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    <option value="">Select a time</option>
+                    ${doctor.availability ? doctor.availability.map(time => `<option value="${time}">${time}</option>`).join('') : ''}
+                </select>
+            </div>
+            <div class="flex items-center justify-between">
+                <button id="confirmBookingBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Confirm Booking</button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+    setTimeout(() => modal.classList.add('modal-active'), 10); 
+
+    const confirmBookingBtn = modal.querySelector('#confirmBookingBtn');
+    if (confirmBookingBtn) {
+        confirmBookingBtn.addEventListener('click', async () => {
+            // Collect selected date and time
+            const appointmentDate = modal.querySelector('#appointmentDate').value;
+            const appointmentTime = modal.querySelector('#appointmentTime').value;
+
+            if (!appointmentDate || !appointmentTime) {
+                alert("Please select both date and time for the appointment.");
+                return;
+            }
+
+            const startTime = appointmentTime.split(' ')[0];
+
+            const appointment = {
+                doctorId: doctor.id,
+                patientId: patientData.id,
+                appointmentDate: appointmentDate,
+                appointmentTime: startTime
+            };
+
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert("Authentication token not found. Please log in again.");
+                modal.remove();
+                if (ripple) ripple.remove();
+                return;
+            }
+
+            try {
+                const result = await bookAppointment(appointment, token);
+
+                if (result.success) {
+                    alert(result.message || "Appointment successfully booked!");
+                    modal.remove();
+                    if (ripple) ripple.remove();
+                } else {
+                    alert(result.message || "Failed to book appointment.");
+                }
+            } catch (error) {
+                console.error("Error during appointment booking:", error);
+                alert("An unexpected error occurred while booking the appointment. Please try again.");
+            }
+        });
+    }
+}
 
 
-  Function: filterDoctorsOnChange
-  Purpose: Fetch and display doctors based on user-selected filters
+async function filterDoctorsOnChange() {
+    const searchBar = document.getElementById("searchBar").value;
+    const filterTime = document.getElementById("filterTime").value;
+    const filterSpecialty = document.getElementById("filterSpecialty").value;
 
-   Read input values (name, time, specialty)
-   Set them to 'null' if empty, as expected by backend
-   Call filterDoctors(name, time, specialty)
-   If doctors are returned:
-     - Clear previous content
-     - Create and display a card for each doctor
-   If no results found, show a message: "No doctors found with the given filters."
-   Handle and display any fetch errors
+    const name = searchBar.trim() === "" ? null : searchBar.trim();
+    const time = filterTime === "" ? null : filterTime;
+    const specialty = filterSpecialty === "" ? null : filterSpecialty;
+
+    const contentDiv = document.getElementById("content");
+    if (!contentDiv) {
+        console.error("Content div not found.");
+        return;
+    }
+    contentDiv.innerHTML = "";
+
+    try {
+        const filteredResults = await filterDoctors(name, time, specialty);
+        if (filteredResults && filteredResults.length > 0) {
+            renderDoctorCards(filteredResults);
+        } else {
+            contentDiv.innerHTML = '<p class="text-center text-gray-500">No doctors found with the given filters.</p>';
+        }
+    } catch (error) {
+        console.error("Error filtering doctors:", error);
+        alert("Error filtering doctors. Please try again.");
+        contentDiv.innerHTML = '<p class="text-center text-red-500">Error filtering doctors.</p>';
+    }
+}
 
 
-  Function: renderDoctorCards
-  Purpose: Render a list of doctor cards passed as an argument
-  Used to dynamically render pre-filtered results or external data
-*/
+export function renderDoctorCards(doctors) {
+    const contentDiv = document.getElementById("content");
+    if (contentDiv) {
+        contentDiv.innerHTML = "";
+        doctors.forEach(doctor => {
+            const doctorCard = createDoctorCard(doctor);
+            contentDiv.appendChild(doctorCard);
+        });
+    }
+}

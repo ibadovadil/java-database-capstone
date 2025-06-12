@@ -1,50 +1,86 @@
-/*
-  Import the prescription service functions: savePrescription and getPrescription
 
-  Wait for the DOM content to load before running the script
-  Inside the event listener:
-    - Get references to form input elements and the heading
-    - Extract query parameters from the URL:
-        - appointmentId: identifies the current appointment
-        - mode: determines if the page is in "add" or "view" mode
-        - patientName: used to pre-fill the patient name
-    - Also retrieve the stored token from localStorage for API calls
+import { savePrescription, getPrescription } from './services/appointmentRecordService.js';
+import { selectRole } from './render.js'; 
 
+document.addEventListener('DOMContentLoaded', async () => {
+  const headingElement = document.getElementById('prescriptionHeading');
+  const patientNameInput = document.getElementById('patientNameInput');
+  const medicationInput = document.getElementById('medication');
+  const dosageInput = document.getElementById('dosage');
+  const notesInput = document.getElementById('notes');
+  const saveButton = document.getElementById('savePrescriptionBtn');
 
-  If the heading element exists:
-    - Check the "mode" query parameter:
-      - If mode is "view": set heading to "View Prescription"
-      - Else (default): set heading to "Add Prescription"
+  const urlParams = new URLSearchParams(window.location.search);
+  const appointmentId = urlParams.get('appointmentId');
+  const mode = urlParams.get('mode'); 
+  const patientName = urlParams.get('patientName');
 
+  const token = localStorage.getItem('token');
 
-  If patientName is available from the URL and the input exists:
-    - Set the patientNameInput field with the given name
+  if (headingElement) {
+    if (mode === 'view') {
+      headingElement.textContent = "View Prescription";
+    } else {
+      headingElement.textContent = "Add Prescription";
+    }
+  }
 
+  if (patientName && patientNameInput) {
+    patientNameInput.value = patientName;
+    patientNameInput.readOnly = true; 
+  }
 
-  If both appointmentId and token are available:
-    - Call getPrescription to fetch prescription data from the server
-    - If a prescription exists (response.prescription is a non-empty array):
-        - Extract the first prescription object
-        - Pre-fill all form fields with the data: medication, dosage, notes, etc.
-        - Use fallback values (like empty string "") for safety
+  if (appointmentId && token) {
+    try {
+      const prescriptionData = await getPrescription(appointmentId, token);
+      if (prescriptionData) {
+        medicationInput.value = prescriptionData.medication || '';
+        dosageInput.value = prescriptionData.dosage || '';
+        notesInput.value = prescriptionData.notes || '';
+      }
+    } catch (error) {
+      console.error("Error fetching prescription:", error);
+    }
+  }
 
-  Catch and log any errors during fetch to handle cases where no prescription exists
+  if (mode === 'view') {
+    if (medicationInput) medicationInput.readOnly = true;
+    if (dosageInput) dosageInput.readOnly = true;
+    if (notesInput) notesInput.readOnly = true;
 
+    if (saveButton) saveButton.style.display = 'none';
+  }
 
-  If mode is "view":
-    - Disable all input fields (make them read-only)
-    - Hide the save button so the user cannot submit changes
+  if (saveButton) {
+    saveButton.addEventListener('click', async (event) => {
+      event.preventDefault();
 
+      const prescription = {
+        appointmentId: appointmentId,
+        patientName: patientName,
+        medication: medicationInput.value,
+        dosage: dosageInput.value,
+        notes: notesInput.value,
+      };
 
-  Attach a click event listener to the "save" button
+      if (!prescription.medication || !prescription.dosage) {
+        alert("Medication and Dosage are required.");
+        return;
+      }
 
-  On click:
-    - Prevent the default form submission behavior
-    - Construct a prescription object from input field values
-    - Call savePrescription with the object and the token
-    - If the save is successful:
-        - Show a success alert
-        - Redirect or call selectRole('doctor') to return to doctor view
-    - If saving fails:
-        - Show an error alert with the message
-*/
+      try {
+        const result = await savePrescription(prescription, token);
+
+        if (result.success) {
+          alert(result.message || "Prescription saved successfully!"); // Show a success alert
+          selectRole('doctor');
+        } else {
+          alert(result.message || "Failed to save prescription.");
+        }
+      } catch (error) {
+        console.error("Error saving prescription:", error);
+        alert("An unexpected error occurred while saving the prescription. Please try again.");
+      }
+    });
+  }
+});

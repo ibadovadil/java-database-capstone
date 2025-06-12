@@ -1,83 +1,141 @@
-/* This is the stylesheet for the addPrescription.html  
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f0f2f5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px;
+    box-sizing: border-box;
+}
 
-Form Container (`.form container`)
+.form-container {
+    width: 100%;
+    max-width: 600px;
+    background-color: #ffffffc8;
+    margin: 50px auto;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    animation: fadeIn 0.5s ease-in-out;
+    box-sizing: border-box;
+}
 
-1. Set the width to 100% to make the form responsive.
-2. Set the maximum width to 600px (or adjust it as needed based on screen size).
-3. Use a semi transparent white background (` ffffffc8`) to make the form look soft.
-4. Center the form horizontally using `margin: 50px auto`.
-5. Add 30px padding inside the form for inner spacing.
-6. Round the corners with a 15px border radius  .
-7. Apply a subtle box shadow to elevate the form (`0 4px 12px rgba(0, 0, 0, 0.1)`).
-8. Animate the form on load with a fade in effect lasting `0.5s`.
+.form-container h2 {
+    text-align: center;
+    color: #222;
+    font-size: 28px;
+    margin-bottom: 25px;
+}
 
-Form Heading (`.container h2`)
+.form-container h2 span {
+    color: #A62B1F;
+}
 
-1. Align the heading text to the center  .
-2. Set the text color to 222 (dark grey).
-3. Use a font size of 28px for the heading.
-4. Add a bottom margin of 25px to create spacing below it.
+label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+    color: #333;
+    text-align: left;
+    font-size: 13px;
+}
 
-Highlighted Text in Heading (`.container h2 span`)
+input,
+textarea {
+    width: 100%;
+    padding: 12px;
+    resize: vertical;
+    margin-bottom: 20px;
+    border: 1px solid rgba(192, 192, 192, 0.5);
+    border-radius: 8px;
+    font-size: 15px;
+    font-family: "Verdana", sans-serif;
+    outline: none;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
 
-1. Change the span text color inside the heading to A62B1F (a bold red shade).
+input:focus,
+textarea:focus {
+    border-color: #015c5d;
+    box-shadow: 0 0 0 3px rgba(167, 243, 208, 0.5);
+    filter: brightness(1.1);
+}
 
-Label Styling (`label`)
+#patientNameInput[readonly] {
+    background-color: #bdbcbc80;
+    cursor: not-allowed;
+}
 
-1. Display labels as block elements  .
-2. Add a bottom margin of 6px to separate them from inputs.
-3. Use medium font weight (500).
-4. Set the text color to  333.
-5. Align text to the left and set font size to 13px.
+.btn.primary {
+    background-color: #047857;
+    color: #fff;
+    padding: 14px;
+    width: 100%;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
 
-Input and Textarea Styling (`input, textarea`)  
+.btn.primary:hover {
+    background-color: #065f46;
+}
 
-1. Set width to 100% for full alignment.
-2. Add 12px padding for comfortable typing space.
-3. Allow vertical resizing of textareas.
-4. Add a bottom margin of 20px between fields.
-5. Use a light grey border with partial transparency.
-6. Round corners with an 8px border radius  .
-7. Set font size to 15px and font family to `"Verdana"`.
-8. Remove default browser outlines and add a 0.3s transition for smooth interactions.
+.btn.secondary {
+    background-color: transparent;
+    color: #555;
+    border: 1px solid #ccc;
+    padding: 12px;
+    width: 100%;
+    font-size: 15px;
+    border-radius: 8px;
+    margin-top: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
 
-Focus Effects (`input:focus, textarea:focus`)  
+.btn.secondary:hover {
+    color: #fff;
+    background-color: rgba(0,0,0,0.1); 
+}
 
-1. Highlight focused fields with a custom border color (` 015c5d`).
-2. Add a soft green glow effect using box shadow (` a7f3d0`).
-3. Slightly increase brightness when the field is focused.
 
-Special Styling for Name Input (`patientName`)  
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
 
-1. Give the input a distinct light grey background (`#bdbcbc80`) to differentiate it.
+@media (max-width: 768px) {
+    .form-container {
+        margin: 20px auto;
+        padding: 20px;
+    }
 
-Primary Button (`.btn primary`)  
+    .form-container h2 {
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
 
-1. Use a green background (`#047857`) with white text  .
-2. Add 14px padding and set width to 100%  .
-3. Remove border and round corners with 8px border radius  .
-4. Set font size to 16px  .
-5. Add pointer cursor and smooth 0.3s transition  .
-6. On hover, darken the button to #065f46  .
+    input,
+    textarea {
+        padding: 10px;
+        font-size: 14px;
+        margin-bottom: 15px;
+    }
 
-Secondary Button (`.btn secondary`)  
-
-1. Make the background transparent with grey text  .
-2. Add a 1px solid border with light grey color.
-3. Set padding to 12px, width to 100%, and font size to 15px  .
-4. Round corners with 8px border radius  .
-5. Add top margin of 12px to separate from other elements.
-6. On hover, change text color to white  .
-
-Fade In Animation (`@keyframes fadeIn`)  
-
-1. Initially set the element to:
-
-      - opacity: 0  
-      - translateY: 30px (slide it down slightly)
-
-2. Animate it to:
-
-      - opacity: 1  
-      - translateY: 0 (move it to the original position)
- */
+    .btn.primary,
+    .btn.secondary {
+        padding: 12px;
+        font-size: 15px;
+    }
+}

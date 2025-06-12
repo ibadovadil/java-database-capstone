@@ -1,165 +1,458 @@
+/* This is the style sheet for global change across the files. */
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #f4f4f4;
+    color: #333;
+    padding: 10px 20px;
+    border-bottom: 2px solid #ccc;
+    flex-wrap: wrap;
+    min-height: 60px;
+}
+
+.logo-section {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo-img {
+    height: 40px;
+    width: auto;
+    max-width: 100%;
+    object-fit: contain;
+}
+
+.logo-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+}
+
+nav a {
+    margin-left: 20px;
+    margin-right: 20px;
+    text-decoration: none;
+    color: #333;
+    font-weight: bold;
+}
+
+nav a:hover {
+    color: #003e3e;
+}
+
+@media (max-width: 600px) {
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    nav {
+        margin-top: 10px;
+    }
+
+    nav a {
+        margin-left: 0;
+        margin-right: 10px;
+    }
+
+    .logo-img {
+        height: 30px;
+    }
+
+    .logo-title {
+        font-size: 18px;
+    }
+}
+
+.doctorHeader {
+    margin-right: 30px;
+}
+
+.doctorHeader:hover {
+    color: #A62B1F;
+}
+
+.footer {
+    background-color: #f4f4f4;
+    color: #fff;
+    padding: 40px 20px;
+    border-top: 2px solid #f4f4f4;
+}
+
+.footer-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.footer-logo {
+    flex: 1 1 250px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+}
+
+.footer-logo img {
+    height: 50px;
+    width: auto;
+}
+
+.footer-logo p {
+    font-size: 14px;
+    color: #0a0a23;
+}
+
+.footer-links {
+    display: flex;
+    flex: 2 1 500px;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.footer-column {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.footer-column h4 {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #0a0a23;
+}
+
+.footer-column a {
+    text-decoration: none;
+    color: #0a0a23;
+    font-size: 14px;
+}
+
+.footer-column a:hover {
+    color: #003e3e;
+    transition: color 0.3s ease;
+}
+
+@media (max-width: 768px) {
+    .footer-container {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .footer-links {
+        flex-direction: column;
+        gap: 20px;
+    }
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 999;
+    padding-top: 60px;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.6);
+}
+
+.modal-content {
+    background-color: white;
+    margin: auto;
+    padding: 30px;
+    border-radius: 10px;
+    width: 400px;
+    position: relative;
+}
+
+.modal-content h2 {
+    font-size: 32px;
+}
+
+.close {
+    color: #aaa;
+    position: absolute;
+    right: 20px;
+    top: 15px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover {
+    color: black;
+}
+
+.dashboard-btn {
+    width: 100%;
+}
+
+.input-field {
+    padding: 10px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+    margin-top: 10px;
+    margin-bottom: 20px;
+    width: 100%;
+    appearance: none;
+    background-color: #fff;
+    color: #333;
+    cursor: pointer;
+    border-radius: 8px;
+}
+
+.input-field:hover {
+    border-color: #015c5d;
+    background-color: #f0fdfd;
+}
+
+.input-field:focus {
+    outline: none;
+    border-color: #015c5d;
+    box-shadow: 0 0 5px rgba(1, 92, 93, 0.5);
+    filter: brightness(1.2);
+}
+
+.select-dropdown option {
+    font-size: 16px;
+    padding: 10px;
+}
+
+#content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(315px, 1fr));
+    gap: 40px;
+    padding: 20px;
+}
+
+.doctor-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    width: auto;
+    overflow: hidden;
+    background-color: #fff;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease;
+}
+
+.doctor-card:hover {
+    transform: scale(1.02);
+}
+
+.doctor-info {
+    padding: 12px;
+    flex-grow: 1;
+}
+
+.doctor-info h3 {
+    margin-top: 30px;
+    font-size: 24px;
+    color: #015c5d;
+}
+
+.doctor-info p {
+    margin: 20px 0px;
+    font-size: 14px;
+    color: #555;
+}
+
+.card-actions {
+    background-color: #e28282;
+    padding: 10px;
+    text-align: center;
+}
+
+.card-actions:hover {
+    background-color: #d26969;
+}
+
+.card-actions button {
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.card-actions button:hover {
+    color: #fff;
+    border-color: #015c5d;
+}
+
+#roleSelector {
+    width: auto;
+    border-radius: 10px;
+}
+
+span {
+    color: #A62B1F;
+}
+
+.searchBar {
+    height: 30px;
+    padding: 20px;
+    font-size: 16px;
+    margin-bottom: 30px;
+    border: 0.2px solid grey;
+}
+
+.searchBar:focus {
+    outline: none;
+    border-color: #015c5d;
+    box-shadow: 0 0 5px rgba(1, 92, 93, 0.697);
+}
+
+.filter-wrapper {
+    width: 350px;
+    display: flex;
+    flex-direction: row;
+}
+
+.filter-select {
+    margin-right: 8px;
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background-color: #fff;
+    color: #333;
+    font-size: 14px;
+    background-position: right 10px center;
+    background-size: 16px 16px;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.filter-select:focus {
+    border-color: #015c5d;
+    box-shadow: 0 0 5px rgba(1, 92, 93, 0.697);
+    outline: none;
+}
+
+.availabilityLabel {
+    margin-bottom: 8px;
+}
+
+.availability-container {
+    margin-bottom: 1rem;
+}
+
+.checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.checkbox-group label {
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.checkbox-group input[type="checkbox"] {
+    margin-right: 0.5rem;
+    accent-color: #015c5db8;
+}
+
 /* This is the style sheet for the updateAppointment.html */
-/* 
-`.form-container`
+.form-container {
+    max-width: 600px;
+    background: #ffffffc8;
+    margin: 10px auto;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    animation: fadeIn 0.5s ease-in-out;
+}
 
-Purpose:
+.container h2 {
+    text-align: center;
+    color: #222;
+    font-size: 28px;
+    margin-bottom: 25px;
+}
 
-To create a styled, centered container for the form with a modern card-like look and an entry animation.
+.container h2 span {
+    color: #A62B1F;
+}
 
-Properties Used:
+label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+    color: #333;
+    text-align: left;
+    font-size: 13px;
+}
 
-* `max-width: 600px` → Limits the maximum width.
-* `background: #ffffffc8` → White background with transparency.
-* `margin: 10px auto` → Centered horizontally, with vertical margin.
-* `padding: 30px` → Internal spacing.
-* `border-radius: 15px` → Rounded corners.
-* `box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1)` → Soft drop shadow.
-* `animation: fadeIn 0.5s ease-in-out` → Fade-in animation when loaded.
+input, textarea, select {
+    width: 100%;
+    padding: 12px;
+    resize: vertical;
+    margin-bottom: 20px;
+    border: 1px solid #cccccc6e;
+    border-radius: 8px;
+    font-size: 15px;
+    outline: none;
+    transition: 0.3s;
+    font-family: "Verdana", sans-serif;
+}
 
-`.container h2`
+input:focus, textarea:focus {
+    border-color: #015c5d;
+    box-shadow: 0 0 4px #a7f3d0;
+    filter: brightness(1.5);
+}
 
-Purpose:
+#patientName {
+    background-color: #bdbcbc80;
+}
 
-To style the heading of the form and make it prominent.
+.btn-primary {
+    background-color: #047857;
+    color: #fff;
+    padding: 14px;
+    width: 100%;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.3s;
+}
 
-Properties Used:
+.btn-primary:hover {
+    background-color: #065f46;
+}
 
-* `text-align: center` → Center-aligns the heading.
-* `color: #222` → Dark gray text.
-* `font-size: 28px` → Larger text size.
-* `margin-bottom: 25px` → Spacing below the heading.
+.btn-secondary {
+    background-color: transparent;
+    color: #333;
+    border: 1px solid #ccc;
+    padding: 12px;
+    width: 100%;
+    border-radius: 8px;
+    font-size: 15px;
+    margin-top: 12px;
+    cursor: pointer;
+}
 
-`.container h2 span`
+.btn-secondary:hover {
+    color: #fff;
+}
 
-Purpose:
-
-To highlight a part of the heading (usually a keyword or important word).
-
-Properties Used:
-
-* `color: #A62B1F` → Reddish color for emphasis.
-
-`label`
-
-Purpose:
-
-To style the labels above input fields for better readability and alignment.
-
-Properties Used:
-
-* `display: block` → Makes label appear on a separate line.
-* `margin-bottom: 6px` → Adds spacing below the label.
-* `font-weight: 500` → Semi-bold font weight.
-* `color: #333` → Dark gray color.
-* `text-align: left` → Aligns text to the left.
-* `font-size: 13px` → Smaller readable text.
-
-`input, textarea, select`
-
-Purpose:
-
-To uniformly style all form fields (input, textarea, select) for consistency and better UX.
-
-Properties Used:
-
-* `width: 100%` → Takes full width of container.
-* `padding: 12px` → Internal padding for comfortable input.
-* `resize: vertical` → Only textareas can resize vertically.
-* `margin-bottom: 20px` → Adds space below each field.
-* `border: 1px solid #cccccc6e` → Light, semi-transparent border.
-* `border-radius: 8px` → Slightly rounded corners.
-* `font-size: 15px` → Medium text size.
-* `outline: none` → Removes default blue border on focus.
-* `transition: 0.3s` → Smooth transition effects.
-* `font-family: "Verdana"` → Sets font to Verdana.
-
-`input:focus, textarea:focus`
-
-Purpose:
-
-To visually indicate when a user is focused on an input or textarea.
-
-Properties Used:
-
-* `border-color: #015c5d` → Dark teal border on focus.
-* `box-shadow: 0 0 4px #a7f3d0` → Greenish glow effect.
-* `filter: brightness(1.5)` → Makes the field brighter.
-
-`#patientName`
-
-Purpose:
-
-To visually distinguish the "patientName" field—usually meant to be disabled or read-only.
-
-Properties Used:
-
-* `background-color: #bdbcbc80` → Light gray background with transparency.
-
-`.btn-primary`
-
-Purpose:
-
-To style the main action button (likely "Submit" or "Update") with a bold color and good spacing.
-
-Properties Used:
-
-* `background-color: #047857` → Dark green background.
-* `color: #fff` → White text.
-* `padding: 14px` → Internal padding for a large clickable area.
-* `width: 100%` → Full-width button.
-* `border: none` → No border.
-* `border-radius: 8px` → Rounded corners.
-* `font-size: 16px` → Medium-large readable text.
-* `cursor: pointer` → Shows hand cursor on hover.
-* `transition: 0.3s` → Smooth hover transition.
-
-`.btn-primary:hover`
-
-Purpose:
-
-To visually indicate hover state for the main button.
-
-Properties Used:
-
-* `background-color: #065f46` → Slightly darker green.
-
-`.btn-secondary`
-
-Purpose:
-
-To style the secondary button (like “Cancel” or “Back”) with a more subtle look.
-
-Properties Used:
-
-* `background-color: transparent` → No background color.
-* `color: #333` → Dark gray text.
-* `border: 1px solid #ccc` → Light gray border.
-* `padding: 12px` → Spacing inside button.
-* `width: 100%` → Full-width button.
-* `border-radius: 8px` → Rounded corners.
-* `font-size: 15px` → Medium text size.
-* `margin-top: 12px` → Space above the button.
-* `cursor: pointer` → Hand cursor on hover.
-
-`.btn-secondary:hover`
-
-Purpose:
-
-To change text color on hover for secondary button.
-
-Properties Used:
-
-* `color: #fff` → White text on hover (background remains transparent unless styled elsewhere).
-
-`@keyframes fadeIn`
-
-Purpose:
-
-To define the animation for a smooth fade-in effect when the form is loaded.
-
-Properties Used:
-
-* `from { opacity: 0; transform: translateY(30px); }` → Starts invisible and pushed down.
-* `to { opacity: 1; transform: translateY(0); }` → Ends fully visible in the original position.
-
-*/
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
