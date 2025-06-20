@@ -1,19 +1,17 @@
-
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-html,
-body {
+html, body {
   height: 100%;
   font-family: 'Roboto', sans-serif;
 }
 
 .wrapper {
   display: flex;
-  flex-direction: column;
+  flex-direction:column ;
   min-height: 100vh;
 }
 
@@ -23,10 +21,6 @@ h2 {
   color: #003e3e;
   font-weight: bold;
   font-family: 'Alegreya', 'Roboto', sans-serif;
-}
-
-span {
-  color: red;
 }
 
 .main-content {
@@ -43,6 +37,11 @@ span {
   background-repeat: no-repeat;
   background-attachment: fixed;
 }
+.button-group {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+}
 
 button {
   background-color: #015c5d;
@@ -50,11 +49,10 @@ button {
   border: none;
   border-radius: 12px;
   padding: 10px 20px;
-  width: 200px;
   margin-top: 10px;
+  width: 200px;
   cursor: pointer;
   font-size: 16px;
-  transition: background-color 0.3s ease;
 }
 
 button:hover {

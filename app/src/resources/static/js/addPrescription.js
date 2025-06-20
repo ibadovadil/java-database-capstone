@@ -1,86 +1,77 @@
-
-import { savePrescription, getPrescription } from './services/appointmentRecordService.js';
-import { selectRole } from './render.js'; 
+import { savePrescription, getPrescription } from "./services/prescriptionServices.js";
 
 document.addEventListener('DOMContentLoaded', async () => {
-  const headingElement = document.getElementById('prescriptionHeading');
-  const patientNameInput = document.getElementById('patientNameInput');
-  const medicationInput = document.getElementById('medication');
-  const dosageInput = document.getElementById('dosage');
-  const notesInput = document.getElementById('notes');
-  const saveButton = document.getElementById('savePrescriptionBtn');
+  const savePrescriptionBtn = document.getElementById("savePrescription");
+  const patientNameInput = document.getElementById("patientName");
+  const medicinesInput = document.getElementById("medicines");
+  const dosageInput = document.getElementById("dosage");
+  const notesInput = document.getElementById("notes");
+  const heading = document.getElementById("heading");
 
   const urlParams = new URLSearchParams(window.location.search);
-  const appointmentId = urlParams.get('appointmentId');
-  const mode = urlParams.get('mode'); 
-  const patientName = urlParams.get('patientName');
+  const appointmentId = urlParams.get("appointmentId");
+  const patientName = urlParams.get("patientName");
+  const mode = urlParams.get("mode");
+  const token = localStorage.getItem("token");
 
-  const token = localStorage.getItem('token');
+  console.log("Appointment ID:", appointmentId);
+  console.log("Patient Name:", patientName);
 
-  if (headingElement) {
-    if (mode === 'view') {
-      headingElement.textContent = "View Prescription";
+  if (heading) {
+    if (mode === "view") {
+      heading.innerHTML = `View <span>Prescription</span>`;
     } else {
-      headingElement.textContent = "Add Prescription";
+      heading.innerHTML = `Add <span>Prescription</span>`;
     }
   }
 
-  if (patientName && patientNameInput) {
+  if (patientNameInput && patientName) {
     patientNameInput.value = patientName;
-    patientNameInput.readOnly = true; 
   }
 
   if (appointmentId && token) {
     try {
-      const prescriptionData = await getPrescription(appointmentId, token);
-      if (prescriptionData) {
-        medicationInput.value = prescriptionData.medication || '';
-        dosageInput.value = prescriptionData.dosage || '';
-        notesInput.value = prescriptionData.notes || '';
+      const response = await getPrescription(appointmentId, token);
+      console.log("getPrescription response:", response);
+
+      if (response.prescription && response.prescription.length > 0) {
+        const existingPrescription = response.prescription[0];
+        patientNameInput.value = existingPrescription.patientName || "";
+        medicinesInput.value = existingPrescription.medication || "";
+        dosageInput.value = existingPrescription.dosage || "";
+        notesInput.value = existingPrescription.doctorNotes || "";
       }
     } catch (error) {
-      console.error("Error fetching prescription:", error);
+      console.warn("No existing prescription found or failed to load:", error);
     }
   }
 
   if (mode === 'view') {
-    if (medicationInput) medicationInput.readOnly = true;
-    if (dosageInput) dosageInput.readOnly = true;
-    if (notesInput) notesInput.readOnly = true;
-
-    if (saveButton) saveButton.style.display = 'none';
+    patientNameInput.disabled = true;
+    medicinesInput.disabled = true;
+    dosageInput.disabled = true;
+    notesInput.disabled = true;
+    savePrescriptionBtn.style.display = "none";
   }
 
-  if (saveButton) {
-    saveButton.addEventListener('click', async (event) => {
-      event.preventDefault();
+  savePrescriptionBtn.addEventListener('click', async (e) => {
+    e.preventDefault();
 
-      const prescription = {
-        appointmentId: appointmentId,
-        patientName: patientName,
-        medication: medicationInput.value,
-        dosage: dosageInput.value,
-        notes: notesInput.value,
-      };
+    const prescription = {
+      patientName: patientNameInput.value,
+      medication: medicinesInput.value,
+      dosage: dosageInput.value,
+      doctorNotes: notesInput.value,
+      appointmentId
+    };
 
-      if (!prescription.medication || !prescription.dosage) {
-        alert("Medication and Dosage are required.");
-        return;
-      }
+    const { success, message } = await savePrescription(prescription, token);
 
-      try {
-        const result = await savePrescription(prescription, token);
-
-        if (result.success) {
-          alert(result.message || "Prescription saved successfully!"); // Show a success alert
-          selectRole('doctor');
-        } else {
-          alert(result.message || "Failed to save prescription.");
-        }
-      } catch (error) {
-        console.error("Error saving prescription:", error);
-        alert("An unexpected error occurred while saving the prescription. Please try again.");
-      }
-    });
-  }
+    if (success) {
+      alert("Prescription saved successfully.");
+      selectRole('doctor');
+    } else {
+      alert("Failed to save prescription: " + message);
+    }
+  });
 });

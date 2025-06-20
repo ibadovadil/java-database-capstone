@@ -6,11 +6,8 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.Max;
 
 @Entity
-@Table(name = "appointment")
 public class Appointment {
 
     @Id
@@ -18,36 +15,34 @@ public class Appointment {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "doctor_id", nullable = false)
-    @NotNull(message = "Doctor cannot be null for an appointment")
+    @NotNull
     private Doctor doctor;
 
     @ManyToOne
-    @JoinColumn(name = "patient_id", nullable = false)
-    @NotNull(message = "Patient cannot be null for an appointment")
+    @NotNull
     private Patient patient;
 
-    @NotNull(message = "Appointment time cannot be null")
-    @Future(message = "Appointment time must be in the future")
-    @Column(name = "appointment_time", nullable = false)
+    @Future(message = "Appointment time must be in the future.")
     private LocalDateTime appointmentTime;
 
-    @Min(value = 0, message = "Status must be 0 or 1")
-    @Max(value = 1, message = "Status must be 0 or 1")
-    @Column(nullable = false)
+    @NotNull
     private int status;
-    // Constructors
-    public Appointment() {
+
+    @Transient
+    public LocalDateTime getEndTime() {
+        return appointmentTime.plusHours(1);
     }
 
-    public Appointment(Doctor doctor, Patient patient, LocalDateTime appointmentTime, Integer status) {
-        this.doctor = doctor;
-        this.patient = patient;
-        this.appointmentTime = appointmentTime;
-        this.status = status;
+    @Transient
+    public LocalDate getAppointmentDate() {
+        return appointmentTime.toLocalDate();
     }
 
-    // Getters and Setters
+    @Transient
+    public LocalTime getAppointmentTimeOnly() {
+        return appointmentTime.toLocalTime();
+    }
+
     public Long getId() {
         return id;
     }
@@ -80,47 +75,11 @@ public class Appointment {
         this.appointmentTime = appointmentTime;
     }
 
-    public Integer getStatus() {
+    public int getStatus() {
         return status;
     }
 
-    public void setStatus(Integer status) {
+    public void setStatus(int status) {
         this.status = status;
-    }
-
-    // Helper methods
-    @Transient
-    public LocalDateTime getEndTime() {
-        if (appointmentTime == null) {
-            return null;
-        }
-        return appointmentTime.plusHours(1);
-    }
-
-    @Transient
-    public LocalDate getAppointmentDate() {
-        if (appointmentTime == null) {
-            return null;
-        }
-        return appointmentTime.toLocalDate();
-    }
-
-    @Transient
-    public LocalTime getAppointmentTimeOnly() {
-        if (appointmentTime == null) {
-            return null;
-        }
-        return appointmentTime.toLocalTime();
-    }
-
-    @Override
-    public String toString() {
-        return "Appointment{" +
-                "id=" + id +
-                ", doctorId=" + (doctor != null ? doctor.getId() : "null") +
-                ", patientId=" + (patient != null ? patient.getId() : "null") +
-                ", appointmentTime=" + appointmentTime +
-                ", status=" + status +
-                '}';
     }
 }

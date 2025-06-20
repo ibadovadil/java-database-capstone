@@ -1,48 +1,159 @@
+<!-- updateAppointment.html -->
+
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <link rel="icon" type="image/svg+xml" href="../assets/images/logo/logo.png" />
     <title>DoctorDashboard</title>
     <link rel="stylesheet" href="../assets/css/adminDashboard.css">
-    <link rel="stylesheet" href="../assets/">
-    <link rel="stylesheet" href="../assets//css/updateAppointment.css">
-    <link rel="stylesheet" href="../assets//css/style.css">
+    <link rel="stylesheet" href="../assets/css/doctorDashboard.css">
+    <link rel="stylesheet" href="../assets/css/updateAppointment.css">
+    <link rel="stylesheet" href="../assets/css/style.css">
     <script type="module" src="../js/render.js" defer></script>
     <script type="module" src="../js/util.js" defer></script>
     <script type="module" src="../js/components/header.js" defer></script>
     <script type="module" src="../js/components/footer.js" defer></script>
     <script type="module" src="../js/updateAppointment.js" defer></script>
 </head>
+
 <body onload="renderContent()">
-    <div class="container">
-        <div class="wrapper">
-            <div id="header"></div>
-            <div class="main-content">
-                <div class="form-container">
-                    <h2 id="updateAppointmentHeading">Update <span>Appointment</span></h2>
-                    <form id="updateAppointmentForm">
-                        <label for="patientNameInput">Patient Name:</label>
-                        <input type="text" id="patientNameInput" class="input-field" disabled>
+<div class="container">
+    <div class="wrapper">
+        <div id="header"></div>
+        <div class="main-content">
+            <div class="form-container">
+                <h2>Update <span>Appointment</span></h2>
+                <form id="updateAppointmentForm">
+                    <label for="patientName">Patient Name</label>
+                    <input type="text" id="patientName" disabled>
 
-                        <label for="doctorNameInput">Doctor Name:</label>
-                        <input type="text" id="doctorNameInput" class="input-field" disabled>
+                    <label for="doctorName">Doctor Name</label>
+                    <input type="text" id="doctorName" disabled>
 
-                        <label for="appointmentDateInput">Appointment Date:</label>
-                        <input type="date" id="appointmentDateInput" class="input-field">
+                    <label for="appointmentDate">Date</label>
+                    <input type="date" id="appointmentDate" required>
 
-                        <label for="appointmentTimeSelect">Appointment Time:</label>
-                        <select id="appointmentTimeSelect" class="input-field">
-                            <!-- Options will be dynamically populated by JavaScript -->
-                        </select>
+                    <label for="appointmentTime">Time</label>
+                    <select id="appointmentTime" required>
+                    </select>
 
-                        <button type="submit" id="submitUpdateButton" class="btn-primary">Update Appointment</button>
-                        <button type="button" id="cancelUpdateButton" class="btn-secondary" onclick="window.location.href='/patientAppointments.html'">Cancel</button>
-                    </form>
-                </div>
+                    <button type="submit" class="btn-primary" id="updateAppointment">Update Appointment</button>
+                    <button type="button" onclick="window.location.href='/pages/patientAppointments.html'"
+                            class="btn-secondary">Cancel</button>
+                </form>
             </div>
-            <div id="footer"></div>
         </div>
+        <div id="footer"></div>
     </div>
+</div>
+
 </body>
+
 </html>
+
+<!-- index.html -->
+<!--
+
+Step-by-Step Explanation of `index.html`.
+This file allows users to select a role (Admin, Patient, Doctor)
+and triggers modal-based login functionality.
+
+1. Label the File
+
+   * Add a comment at the very top to identify the file as `index.html`. This helps developers stay organized.
+
+2. Declare Document Type
+
+   * Use the declaration for HTML5 so browsers know how to render the page correctly.
+
+3. Start the HTML Document
+
+   * Begin the HTML structure and set the document language to English to improve accessibility and SEO `lang="en"`.
+
+4. Head Section (Metadata and Resources)
+
+   * Open the `<head>` section which contains settings and links that don’t show up visually.
+
+5. Set Character Encoding
+
+   * Specify UTF-8 encoding to support most global characters and symbols.
+
+6. Set the Page Title
+
+   * Give the page a name (e.g., "Select Role") that appears on the browser tab.
+
+7. Add a Favicon
+
+   * Link to an icon (like a logo) that will appear in the browser tab from the address `href="../assets/images/logo/Logo.png"`
+
+8. Link Stylesheets
+
+   * Add a page-specific stylesheet for layout and design.
+   * Also include a global stylesheet for shared site-wide styles.
+
+   HINT:
+      `<link rel="stylesheet" href="../assets/css/index.css">`
+      `<link rel="stylesheet" href="../assets/css/style.css">`
+
+9. Add JavaScript Files with `defer`
+
+   * Link utility and rendering JavaScript files (e.g., `util.js`, `render.js`).
+   * Include scripts for rendering components like header and footer.
+   * Use the `defer` attribute so they load after the HTML is parsed.
+
+   HINT:
+      `<script src="../js/util.js" defer></script>`
+      `<script src="../js/render.js" defer></script>`
+      `<script src="../js/components/header.js" defer></script>`
+      `<script src="../js/components/footer.js" defer></script>`
+
+10. Close the Head and Open the Body
+
+    * Wrap up metadata and begin the visible page content.
+
+11. Create a Container
+
+    * Add a main container to hold all page elements and apply layout constraints.
+
+12. Use a Wrapper for Structure
+
+    * Inside the container, add a wrapper to group header, main, and footer sections logically.
+
+13. Insert a Header Placeholder
+
+    * Add a `div` that will be dynamically filled by JavaScript with the site’s header.
+
+14. Define the Main Section
+
+    * Use a semantic `<main>` tag to hold the central content of the page.
+
+15. Add a Heading for Role Selection
+
+    * Display a heading like “Select Your Role” to instruct users.
+
+16. Add Buttons for Roles
+
+    * Create buttons for each role: Admin, Patient, and Doctor.
+    * Assign unique identifiers or `onclick` handlers to them as needed.
+
+17. Insert a Footer Placeholder
+
+    * Add a `div` that will be dynamically filled by JavaScript with the site’s footer.
+
+18. Create a Modal Structure
+
+    * Add a modal overlay for popups (like login forms).
+    * Include a close button and an inner container for dynamic content.
+
+19. Load Page-Specific Logic Module
+
+    * Use a `<script type="module">` tag to load the role selection logic (e.g., `index.js`).
+    * Ensure it’s deferred so it doesn’t block HTML rendering.
+
+20. Close the Body and HTML Tags
+
+    * Properly close all opened tags to complete the document structure.
+
+ -->

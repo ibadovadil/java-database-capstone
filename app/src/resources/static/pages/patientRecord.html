@@ -15,25 +15,25 @@
     <script type="module" src="../js/patientRecordServices.js" defer></script>
 </head>
 <body onload="renderContent()">
-    <div class="container">
-        <div class="wrapper">
-            <div id="header"></div>
-            <div class="main-content">
-                <h2>Patient <span>Record</span></h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Appointment ID</th>
-                            <th>Patient ID</th>
-                            <th>Prescription</th>
-                        </tr>
-                    </thead>
-                    <tbody id="patientTableBody"></tbody>
-                </table>
-            </div>
-            <div id="footer"></div>
+<div class="container">
+    <div class="wrapper">
+        <div id="header"></div>
+        <div class="main-content">
+            <h2>Patient <span>Record</span></h2>
+            <table id="patientTable">
+                <thead class="table-header">
+                <tr>
+                    <th>Date</th>
+                    <th>Appointment ID</th>
+                    <th>Patient ID</th>
+                    <th>Prescription</th>
+                </tr>
+                </thead>
+                <tbody id="patientTableBody"></tbody>
+            </table>
         </div>
+        <div id="footer"></div>
     </div>
+</div>
 </body>
 </html>

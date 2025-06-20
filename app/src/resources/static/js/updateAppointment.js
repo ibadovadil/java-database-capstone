@@ -1,118 +1,94 @@
-import { getDoctors } from './services/doctorServices.js';
-import { updateAppointment as updateAppointmentService } from './services/appointmentRecordService.js';
-import { selectRole } from './render.js';
+import { updateAppointment } from "../js/services/appointmentRecordService.js";
+import { getDoctors } from "../js/services/doctorServices.js";
 
-let token;
-let appointmentId;
-let patientId;
-let doctorId;
-let patientName;
-let doctorName;
-let appointmentDate;
-let appointmentTime;
-let doctor;
-
-document.addEventListener('DOMContentLoaded', async () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    appointmentId = urlParams.get('appointmentId');
-    patientId = urlParams.get('patientId');
-    doctorId = urlParams.get('doctorId');
-    patientName = urlParams.get('patientName');
-    doctorName = urlParams.get('doctorName');
-    appointmentDate = urlParams.get('appointmentDate');
-    appointmentTime = urlParams.get('appointmentTime');
-
-    token = localStorage.getItem('token');
-
-    if (!token || !patientId) {
-        console.error("Authentication token or patient ID missing. Redirecting to patient appointments page.");
-        window.location.href = "/patientAppointments.html";
-        return;
-    }
-
-    await initializePage();
-
-    const updateAppointmentForm = document.getElementById('updateAppointmentForm');
-    if (updateAppointmentForm) {
-        updateAppointmentForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            await handleUpdateAppointmentFormSubmission();
-        });
-    }
-});
+document.addEventListener("DOMContentLoaded", initializePage);
 
 async function initializePage() {
-    const patientNameInput = document.getElementById('patientNameInput');
-    const doctorNameInput = document.getElementById('doctorNameInput');
-    const appointmentDateInput = document.getElementById('appointmentDateInput');
-    const appointmentTimeSelect = document.getElementById('appointmentTimeSelect');
+  const token = localStorage.getItem("token");
+  const urlParams = new URLSearchParams(window.location.search);
+  const appointmentId = urlParams.get("appointmentId");
+  const patientId = urlParams.get("patientId");
+  const doctorId = urlParams.get("doctorId");
+  const patientName = urlParams.get("patientName");
+  const doctorName = urlParams.get("doctorName");
+  const appointmentDate = urlParams.get("appointmentDate");
+  const appointmentTime = urlParams.get("appointmentTime");
 
-    if (patientNameInput) patientNameInput.value = patientName || '';
-    if (doctorNameInput) doctorNameInput.value = doctorName || '';
-    if (appointmentDateInput) appointmentDateInput.value = appointmentDate || '';
-    if (appointmentTimeSelect) appointmentTimeSelect.value = appointmentTime || '';
+  console.log(doctorId);
 
-    try {
-        const allDoctors = await getDoctors();
-        if (allDoctors && allDoctors.length > 0) {
-            doctor = allDoctors.find(doc => doc.id === doctorId);
+  if (!token || !patientId) {
+    alert("Missing session data, redirecting to appointments page.");
+    window.location.href = "/pages/patientAppointments.html";
+    return;
+  }
 
-            if (doctor && appointmentTimeSelect) {
-                appointmentTimeSelect.innerHTML = '<option value="">Select a time</option>';
-                doctor.availability.forEach(timeSlot => {
-                    const option = document.createElement('option');
-                    option.value = timeSlot;
-                    option.textContent = timeSlot;
-                    appointmentTimeSelect.appendChild(option);
-                });
-                if (appointmentTime) {
-                    appointmentTimeSelect.value = appointmentTime;
-                }
-            } else if (!doctor) {
-                console.error("Selected doctor not found in the fetched list.");
-                alert("Selected doctor details could not be loaded.");
-            }
-        } else {
-            console.error("No doctors found in the system.");
-            alert("No doctors available to load appointment times.");
-        }
-    } catch (error) {
-        console.error("Error fetching doctor list for appointment update:", error);
-        alert("Error loading doctor information. Please try again.");
-    }
-}
-
-async function handleUpdateAppointmentFormSubmission() {
-    const appointmentDateInput = document.getElementById('appointmentDateInput');
-    const appointmentTimeSelect = document.getElementById('appointmentTimeSelect');
-
-    const newAppointmentDate = appointmentDateInput ? appointmentDateInput.value : '';
-    const newAppointmentTime = appointmentTimeSelect ? appointmentTimeSelect.value : '';
-
-    if (!newAppointmentDate || !newAppointmentTime) {
-        alert("Please select both a date and a time for the appointment.");
+  getDoctors()
+    .then(doctors => {
+      const doctor = doctors.find(d => d.id == doctorId);
+      if (!doctor) {
+        alert("Doctor not found.");
         return;
-    }
+      }
 
-    const updatedAppointment = {
-        id: appointmentId,
-        patientId: patientId,
-        doctorId: doctorId,
-        appointmentDate: newAppointmentDate,
-        appointmentTime: newAppointmentTime
-    };
+      document.getElementById("patientName").value = patientName || "You";
+      document.getElementById("doctorName").value = doctorName;
+      document.getElementById("appointmentDate").value = appointmentDate;
+      document.getElementById("appointmentTime").value = appointmentTime;
 
-    try {
-        const result = await updateAppointmentService(updatedAppointment, token);
+      const timeSelect = document.getElementById("appointmentTime");
 
-        if (result.success) {
-            alert(result.message || "Appointment updated successfully!");
-            window.location.href = "/patientAppointments.html";
-        } else {
-            alert(result.message || "Failed to update appointment. Please try again.");
+      if (appointmentTime && !doctor.availableTimes.includes(appointmentTime)) {
+        const option = document.createElement("option");
+        option.value = appointmentTime;
+        option.textContent = appointmentTime;
+        timeSelect.appendChild(option);
+      }
+      doctor.availableTimes.forEach(time => {
+        const option = document.createElement("option");
+        option.value = time;
+        option.textContent = time;
+        timeSelect.appendChild(option);
+      });
+
+      if (appointmentTime) {
+        timeSelect.value = appointmentTime;
+      }
+
+      document.getElementById("updateAppointmentForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const date = document.getElementById("appointmentDate").value;
+        const time = document.getElementById("appointmentTime").value;
+        const startTime = time.split('-')[0];
+
+        console.log(date);
+        console.log(startTime);
+
+        if (!date || !time) {
+          alert("Please select both date and time.");
+          return;
         }
-    } catch (error) {
-        console.error("Error updating appointment:", error);
-        alert("An unexpected error occurred during appointment update. Please try again.");
-    }
+
+        const updatedAppointment = {
+          id: parseInt(appointmentId),
+          doctor: { id: parseInt(doctor.id) },
+          patient: { id: parseInt(patientId) },
+          appointmentTime: `${date}T${startTime}:00`,
+          status: 0
+        };
+
+        const updateResponse = await updateAppointment(updatedAppointment, token);
+
+        if (updateResponse.success) {
+          alert("Appointment updated successfully!");
+          window.location.href = "/pages/patientAppointments.html";
+        } else {
+          alert("Failed to update appointment: " + updateResponse.message);
+        }
+      });
+    })
+    .catch(error => {
+      console.error("Error fetching doctors:", error);
+      alert("Failed to load doctor data.");
+    });
 }

@@ -1,37 +1,29 @@
-import { openModal } from '../components/modals';
-import { selectRole } from '../render.js';
-const ADMIN_API = '/admin';
-const DOCTOR_API = '/doctor/login';
+import { openModal } from "../components/modals.js";
+import API_BASE_URI from '../config/config.js';
+
+const ADMIN_API = `${API_BASE_URI}/admin`;
+const DOCTOR_API = `${API_BASE_URI}/doctor/login`;
 
 window.onload = function () {
-  const adminLoginBtn = document.getElementById('adminLoginBtn');
-  const doctorLoginBtn = document.getElementById('doctorLoginBtn');
+  const adminBtn = document.getElementById('adminLogin');
+  const doctorBtn = document.getElementById('doctorLogin');
 
-  if (adminLoginBtn) {
-    adminLoginBtn.addEventListener('click', () => {
+  if (adminBtn) {
+    adminBtn.addEventListener('click', () => {
       openModal('adminLogin');
     });
   }
 
-  if (doctorLoginBtn) {
-    doctorLoginBtn.addEventListener('click', () => {
+  if (doctorBtn) {
+    doctorBtn.addEventListener('click', () => {
       openModal('doctorLogin');
     });
   }
-
 };
 
-window.adminLoginHandler = async () => {
-  const usernameInput = document.getElementById('adminUsername');
-  const passwordInput = document.getElementById('adminPassword');
-
-  const username = usernameInput ? usernameInput.value : '';
-  const password = passwordInput ? passwordInput.value : '';
-
-  if (!username || !password) {
-    alert("Username and password cannot be blank!");
-    return;
-  }
+window.adminLoginHandler = async function () {
+  const username = document.getElementById('username').value;
+  const password = document.getElementById('password').value;
 
   const admin = { username, password };
 
@@ -47,25 +39,16 @@ window.adminLoginHandler = async () => {
       localStorage.setItem('token', result.token);
       selectRole('admin');
     } else {
-      alert("Invalid username or password!");
+      alert('Invalid credentials!');
     }
   } catch (error) {
-    console.error("An error occurred during the login request:", error);
-    alert("An error occurred. Please try again!");
+    alert('Something went wrong!');
   }
 };
 
-window.doctorLoginHandler = async () => {
-  const emailInput = document.getElementById('doctorEmail');
-  const passwordInput = document.getElementById('doctorPassword');
-
-  const email = emailInput ? emailInput.value : '';
-  const password = passwordInput ? passwordInput.value : '';
-
-  if (!email || !password) {
-    alert("Email and password cannot be blank!");
-    return;
-  }
+window.doctorLoginHandler = async function () {
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
 
   const doctor = { email, password };
 
@@ -79,13 +62,13 @@ window.doctorLoginHandler = async () => {
     if (response.ok) {
       const result = await response.json();
       localStorage.setItem('token', result.token);
+      localStorage.setItem('doctorEmail', doctor.email);
       selectRole('doctor');
     } else {
-      alert("Invalid username or password!");
+      alert('Invalid credentials!');
     }
   } catch (error) {
-    console.error("An error occurred during the login request:", error);
-    alert("An error occurred. Please try again!");
+    console.error('Login failed:', error);
+    alert('Something went wrong!');
   }
 };
-

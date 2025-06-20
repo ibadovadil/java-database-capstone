@@ -1,78 +1,41 @@
-import { getAppointments as createAppointmentRow } from './components/appointmentRow.js';
-import { getAllAppointments } from './services/appointmentRecordService.js';
+import { getAppointments } from "./components/appointmentRow.js";
+import { getAppointmentRecord } from "./services/appointmentRecordService.js";
 
-let tableBody;
-let filterDropdown;
+const tableBody = document.getElementById("patientTableBody");
+const filterSelect = document.getElementById("appointmentFilter");
 
-document.addEventListener('DOMContentLoaded', () => {
-  tableBody = document.getElementById('appointmentRecordTableBody');
-  filterDropdown = document.getElementById('filterAppointments');
+async function loadAppointments(filter = "upcoming") {
+  const appointments = await getAppointmentRecord();
 
-  if (filterDropdown) {
-    filterDropdown.addEventListener('change', (event) => {
-      loadAppointments(event.target.value);
-    });
+  if (!appointments || appointments.length === 0) {
+    tableBody.innerHTML = `<tr><td class="noPatientRecord" colspan='5'>No appointments found.</td></tr>`;
+    return;
   }
 
-  loadAppointments("upcoming");
+  const today = new Date().setHours(0, 0, 0, 0);
+  let filteredAppointments = appointments;
+
+  if (filter === "upcoming") {
+    filteredAppointments = appointments.filter(app => new Date(app.date) >= today);
+  } else if (filter === "past") {
+    filteredAppointments = appointments.filter(app => new Date(app.date) < today);
+  }
+
+  if (filteredAppointments.length === 0) {
+    tableBody.innerHTML = `<tr><td class="noPatientRecord" colspan='5'>No ${filter} appointments found.</td></tr>`;
+    return;
+  }
+
+  tableBody.innerHTML = "";
+  filteredAppointments.forEach(appointment => {
+    const row = getAppointments(appointment);
+    tableBody.appendChild(row);
+  });
+}
+
+filterSelect.addEventListener("change", (e) => {
+  const selectedFilter = e.target.value;
+  loadAppointments(selectedFilter);
 });
 
-async function loadAppointments(filter) {
-  if (!tableBody) {
-    console.error("Appointment record table body not found.");
-    return;
-  }
-
-  tableBody.innerHTML = '';
-
-  const token = localStorage.getItem('token');
-  if (!token) {
-    console.error("Authentication token missing. Cannot load appointment records.");
-    tableBody.innerHTML = '<tr><td colspan="5" class="text-center text-red-500">Authentication error. Please log in again.</td></tr>';
-    return;
-  }
-
-  try {
-    const allAppointments = await getAllAppointments(null, null, token);
-
-    if (!allAppointments || allAppointments.length === 0) {
-      tableBody.innerHTML = '<tr><td colspan="5" class="text-center text-gray-500">No appointments found.</td></tr>';
-      return;
-    }
-
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    let filteredAppointments = [];
-    if (filter === 'upcoming') {
-      filteredAppointments = allAppointments.filter(app => {
-        const appointmentDate = new Date(app.appointmentDate);
-        appointmentDate.setHours(0, 0, 0, 0);
-        return appointmentDate >= today;
-      });
-    } else if (filter === 'past') {
-      filteredAppointments = allAppointments.filter(app => {
-        const appointmentDate = new Date(app.appointmentDate);
-        appointmentDate.setHours(0, 0, 0, 0);
-        return appointmentDate < today;
-      });
-    } else {
-      filteredAppointments = allAppointments;
-    }
-
-    if (filteredAppointments.length === 0) {
-      const message = filter === 'upcoming' ? 'No upcoming appointments found.' : 'No past appointments found.';
-      tableBody.innerHTML = `<tr><td colspan="5" class="text-center text-gray-500">${message}</td></tr>`;
-      return;
-    }
-
-    filteredAppointments.forEach(appointment => {
-      const row = createAppointmentRow(appointment);
-      tableBody.appendChild(row);
-    });
-
-  } catch (error) {
-    console.error("Error loading appointment records:", error);
-    tableBody.innerHTML = '<tr><td colspan="5" class="text-center text-red-500">Error loading appointment records. Please try again later.</td></tr>';
-  }
-}
+loadAppointments("upcoming");

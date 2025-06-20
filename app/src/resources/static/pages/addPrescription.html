@@ -1,46 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <link rel="icon" type="image/svg+xml" href="../assets/images/logo/logo.png" />
-    <title>Add Prescription</title>
+    <title>DoctorDashboard</title>
     <link rel="stylesheet" href="../assets/css/adminDashboard.css">
     <link rel="stylesheet" href="../assets/css/doctorDashboard.css">
     <link rel="stylesheet" href="../assets/css/addPrescription.css">
     <link rel="stylesheet" href="../assets/css/style.css">
     <script type="module" src="../js/render.js" defer></script>
     <script type="module" src="../js/util.js" defer></script>
-    <script type="module" src="../js/header.js" defer></script>
-    <script type="module" src="../js/footer.js" defer></script>
-    <script type="module" src="../js/prescription.js" defer></script>
+    <script type="module" src="../js/components/header.js" defer></script>
+    <script type="module" src="../js/components/footer.js" defer></script>
+    <script type="module" src="../js/addPrescription.js"></script>
 </head>
+
 <body onload="renderContent()">
-    <div class="container">
-        <div class="wrapper">
-            <div id="header"></div>
-            <div class="main-content">
-                <div class="form-container">
-                    <h2 id="prescriptionHeading">Add <span>Prescription</span></h2>
-                    <form id="prescriptionForm">
-                        <label for="patientNameInput">Patient Name:</label>
-                        <input type="text" id="patientNameInput" class="input-field" disabled>
+<div class="container">
+    <div class="wrapper">
+        <div id="header"></div>
+        <div class="main-content">
+            <div class="form-container">
+                <h2 id="heading">Add <span>Prescription</span></h2>
+                <form>
+                    <label for="patientName">Patient Name</label>
+                    <input type="text" id="patientName" disabled>
 
-                        <label for="medication">Medicine Names:</label>
-                        <input type="text" id="medication" class="input-field" placeholder="e.g., Paracetamol, Amoxicillin">
+                    <label for="medicines">Medicine Names</label>
+                    <input type="text" id="medicines" placeholder="e.g., Paracetamol, Vitamin C" required>
 
-                        <label for="dosage">Dosage Instructions:</label>
-                        <textarea id="dosage" class="input-field" rows="4" placeholder="e.g., Take 2 tablets every 8 hours for 5 days"></textarea>
+                    <label for="dosage">Dosage Instructions</label>
+                    <textarea id="dosage" rows="3" placeholder="e.g., Take 1 tablet twice a day after meals"></textarea>
 
-                        <label for="notes">Additional Notes:</label>
-                        <textarea id="notes" class="input-field" rows="4" placeholder="e.g., Take with food, avoid alcohol"></textarea>
+                    <label for="notes">Additional Notes</label>
+                    <textarea id="notes" rows="3" placeholder="Any precautions or observations (optional)"></textarea>
 
-                        <button type="submit" id="savePrescriptionBtn" class="btn-primary">Save Prescription</button>
-                        <button type="button" class="btn-secondary" onclick="selectRole('doctor')">Cancel</button>
-                    </form>
-                </div>
+                    <button type="submit" class="btn-primary" id="savePrescription">Add Prescription</button>
+                    <button type="button" onclick="selectRole('doctor')" class="btn-secondary">Cancel</button>
+                </form>
             </div>
-            <div id="footer"></div>
         </div>
+        <div id="footer"></div>
     </div>
+</div>
 </body>
+
 </html>

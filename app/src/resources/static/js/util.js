@@ -1,11 +1,15 @@
-export function setRole(role) {
+function setRole(role) {
   localStorage.setItem("userRole", role);
 }
 
-export function getRole() {
+function getRole() {
   return localStorage.getItem("userRole");
 }
 
-export function clearRole() {
+function clearRole() {
   localStorage.removeItem("userRole");
 }
+
+window.setRole = setRole;
+window.getRole = getRole;
+window.clearRole = clearRole;

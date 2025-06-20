@@ -1,50 +1,35 @@
 package com.project.back_end.models;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
-import jakarta.validation.constraints.Pattern;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.*;
 
 @Entity
-@Table(name = "patient")
 public class Patient {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull(message = "Name cannot be null")
-    @Size(min = 3, max = 100, message = "Name must be between 3 and 100 characters")
-    @Column(nullable = false, length = 100)
+    @NotNull(message = "Name cannot be null.")
+    @Size(min = 3, max = 100, message = "Name must be between 3 and 100 characters.")
     private String name;
 
-    @NotNull(message = "Email cannot be null")
-    @Email(message = "Email should be valid")
-    @Column(unique = true, nullable = false, length = 100)
+    @NotNull(message = "Email cannot be null.")
+    @Email(message = "Invalid email format.")
     private String email;
 
-    @NotNull(message = "Password cannot be null")
-    @Size(min = 6, message = "Password must be at least 6 characters long")
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @Column(name = "password", nullable = false)
+    @NotNull(message = "Password cannot be null.")
+    @Size(min = 6, message = "Password must be at least 6 characters long.")
     private String password;
 
-    @NotNull(message = "Phone number cannot be null")
-    @Pattern(regexp = "^\\d{10}$", message = "Phone number must be 10 digits")
-    @Column(unique = true, nullable = false, length = 10)
+    @NotNull(message = "Phone number cannot be null.")
+    @Pattern(regexp = "\\d{10}", message = "Phone number must be exactly 10 digits.")
     private String phone;
 
-    @NotNull(message = "Address cannot be null")
-    @Size(max = 255, message = "Address cannot exceed 255 characters")
-    @Column(nullable = false, length = 255)
+    @NotNull(message = "Address cannot be null.")
+    @Size(max = 255, message = "Address cannot exceed 255 characters.")
     private String address;
 
-    public Patient() {
-    }
-
-    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -78,11 +63,11 @@ public class Patient {
     }
 
     public String getPhone() {
-        return this.phone;
+        return phone;
     }
 
     public void setPhone(String phone) {
-        this.phone = phone.replaceAll("-", "");
+        this.phone = phone;
     }
 
     public String getAddress() {
@@ -91,16 +76,5 @@ public class Patient {
 
     public void setAddress(String address) {
         this.address = address;
-    }
-
-    @Override
-    public String toString() {
-        return "Patient{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", email='" + email + '\'' +
-                ", phone='" + phone + '\'' +
-                ", address='" + address + '\'' +
-                '}';
     }
 }

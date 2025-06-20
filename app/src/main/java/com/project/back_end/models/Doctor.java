@@ -2,54 +2,40 @@ package com.project.back_end.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
-import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.*;
 import java.util.List;
 
 @Entity
-@Table(name = "doctor")
 public class Doctor {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull(message = "Name cannot be null")
-    @Size(min = 3, max = 100, message = "Name must be between 3 and 100 characters")
-    @Column(nullable = false, length = 100)
+    @NotNull(message = "Name cannot be null.")
+    @Size(min = 3, max = 100, message = "Name must be between 3 and 100 characters.")
     private String name;
 
-    @NotNull(message = "Specialty cannot be null")
-    @Size(min = 3, max = 50, message = "Specialty must be between 3 and 50 characters")
-    @Column(nullable = false, length = 50)
+    @NotNull(message = "Specialty cannot be null.")
+    @Size(min = 3, max = 50, message = "Specialty must be between 3 and 50 characters.")
     private String specialty;
 
-    @NotNull(message = "Email cannot be null")
-    @Email(message = "Email should be valid")
-    @Column(unique = true, nullable = false, length = 100)
+    @NotNull(message = "Email cannot be null.")
+    @Email(message = "Invalid email format.")
     private String email;
 
-    @NotNull(message = "Password cannot be null")
-    @Size(min = 6, message = "Password must be at least 6 characters long")
+    @NotNull(message = "Password cannot be null.")
+    @Size(min = 6, message = "Password must be at least 6 characters long.")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @Column(name = "password", nullable = false)
     private String password;
 
-    @NotNull(message = "Phone number cannot be null")
-    @Pattern(regexp = "^\\d{10}$", message = "Phone number must be 10 digits")
-    @Column(unique = true, nullable = false, length = 10)
+    @NotNull(message = "Phone number cannot be null.")
+    @Pattern(regexp = "\\d{10}", message = "Phone number must be exactly 10 digits.")
     private String phone;
 
     @ElementCollection
-    @CollectionTable(name = "doctor_available_times", joinColumns = @JoinColumn(name = "doctor_id"))
-    @Column(name = "available_times", nullable = false)
     private List<String> availableTimes;
 
-    public Doctor() {
-    }
-
-    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -95,8 +81,8 @@ public class Doctor {
     }
 
     public void setPhone(String phone) {
-        this.phone = phone.replaceAll("-", "");   
-     }
+        this.phone = phone;
+    }
 
     public List<String> getAvailableTimes() {
         return availableTimes;
@@ -105,17 +91,4 @@ public class Doctor {
     public void setAvailableTimes(List<String> availableTimes) {
         this.availableTimes = availableTimes;
     }
-
-    @Override
-    public String toString() {
-        return "Doctor{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", specialty='" + specialty + '\'' +
-                ", email='" + email + '\'' +
-                ", phone='" + phone + '\'' +
-                ", availableTimes=" + availableTimes +
-                '}';
-    }
-
 }

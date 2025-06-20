@@ -1,39 +1,32 @@
-// render.js
+import API_BASE_URI from './config/config.js';
 
-export function setRole(role) {
-  localStorage.setItem("userRole", role);
-}
 
-export function getRole() {
-  return localStorage.getItem("userRole");
-}
+function selectRole(role) {
+  setRole(role);
+  const token = localStorage.getItem('token');
 
-export function clearRole() {
-  localStorage.removeItem("userRole");
-}
-
-export function selectRole(role) {
-  const token = localStorage.getItem('token'); 
   if (role === "admin") {
-    window.location.href = "/adminDashboard.html";
-  }
-  else if (role === "patient") { 
-    window.location.href = "/patientDashboard.html";
-  }
-  else if (role === "doctor") {
-    window.location.href = "/doctorDashboard.html";
-  }
-  else if (role === "loggedPatient") {
-    window.location.href = "/patientDashboard.html"; 
+    if (token) {
+      window.location.href = `${API_BASE_URI}/adminDashboard/${token}`;
+    }
+  } else if (role === "patient") {
+    window.location.href = "/pages/patientDashboard.html";
+  } else if (role === "doctor") {
+    if (token) {
+      window.location.href = `{API_BASE_URI}/doctorDashboard/${token}`;
+    }
+  } else if (role === "loggedPatient") {
+    window.location.href = "loggedPatientDashboard.html";
   }
 }
 
-export function renderContent() {
-  const userRole = getRole();
-
-  if (!userRole) {
-    window.location.href = "/"; 
+function renderContent() {
+  const role = getRole();
+  if (!role) {
+    window.location.href = "/";
     return;
   }
-
 }
+
+window.selectRole = selectRole;
+window.renderContent = renderContent;

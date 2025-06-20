@@ -1,24 +1,16 @@
-// patientRecordRow.js
-
 export function createPatientRecordRow(patient) {
-  const row = document.createElement('tr');
-
-  row.innerHTML = `
-        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${patient.appointmentDate || 'N/A'}</td>
-        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${patient.id || 'N/A'}</td>
-        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${patient.patientId || 'N/A'}</td>
-        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-            <img src="/assets/icons/prescription-icon.svg" alt="Prescription" class="prescription-btn cursor-pointer w-6 h-6 inline-block" data-id="${patient.id}">
-        </td>
+  const tableRow = document.createElement("tr");
+  tableRow.innerHTML = `
+      <td class="patient-id">${patient.appointmentDate}</td>
+      <td>${patient.id}</td>
+      <td>${patient.patientId}</td>
+      <td><img src="../assets/images/addPrescriptionIcon/addPrescription.png" alt="addPrescriptionIcon" class="prescription-btn" data-id="${patient.id}"></img></td>
     `;
 
-  const prescriptionButton = row.querySelector('.prescription-btn');
-  if (prescriptionButton) {
-    prescriptionButton.addEventListener('click', () => {
-      const appointmentId = prescriptionButton.dataset.id;
-      window.location.href = `/addPrescription.html?mode=view&appointmentId=${appointmentId}&patientName=${patient.name}`; // Also passing patient name for view mode
-    });
-  }
+  tableRow.querySelector(".prescription-btn").addEventListener("click", () =>
+  {
+    window.location.href = `/pages/addPrescription.html?mode=view&appointmentId=${patient.id}`;
+  });
 
-  return row;
+  return tableRow;
 }

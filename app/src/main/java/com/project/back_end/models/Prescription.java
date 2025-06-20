@@ -1,43 +1,43 @@
 package com.project.back_end.models;
 
-import org.springframework.data.mongodb.core.mapping.Document;
+import jakarta.validation.constraints.*;
 import org.springframework.data.annotation.Id;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "prescription")
+@Document(collection = "prescriptions")
 public class Prescription {
 
     @Id
     private String id;
 
-    @NotNull(message = "Patient name cannot be null")
-    @Size(min = 3, max = 100, message = "Patient name must be between 3 and 100 characters")
+    @NotNull(message = "Patient name cannot be null.")
+    @Size(min = 3, max = 100, message = "Patient name must be between 3 and 100 characters.")
     private String patientName;
 
-    @NotNull(message = "Appointment ID cannot be null")
+    @NotNull(message = "Appointment ID cannot be null.")
     private Long appointmentId;
 
-    @NotNull(message = "Medication cannot be null")
-    @Size(min = 3, max = 100, message = "Medication name must be between 3 and 100 characters")
+    @NotNull(message = "Medication cannot be null.")
+    @Size(min = 3, max = 100, message = "Medication name must be between 3 and 100 characters.")
     private String medication;
 
-    @NotNull(message = "Dosage cannot be null")
-    @Size(min = 3, max = 20, message = "Dosage must be between 3 and 20 characters")
+    @NotNull(message = "Dosage cannot be null.")
+    @Size(min = 3, max = 20, message = "Dosage must be between 3 and 20 characters.")
     private String dosage;
 
-    @Size(max = 200, message = "Doctor notes cannot exceed 200 characters")
+    @Size(max = 200, message = "Doctor's notes cannot exceed 200 characters.")
     private String doctorNotes;
 
-    public Prescription() {
-    }
-
-    public Prescription(String patientName, Long appointmentId, String medication, String dosage, String doctorNotes) {
+    public Prescription(
+            String patientName,
+            Long appointmentId,
+            String medication,
+            String dosage
+    ) {
         this.patientName = patientName;
         this.appointmentId = appointmentId;
         this.medication = medication;
         this.dosage = dosage;
-        this.doctorNotes = doctorNotes;
     }
 
     public String getId() {
@@ -86,17 +86,5 @@ public class Prescription {
 
     public void setDoctorNotes(String doctorNotes) {
         this.doctorNotes = doctorNotes;
-    }
-
-    @Override
-    public String toString() {
-        return "Prescription{" +
-                "id='" + id + '\'' +
-                ", patientName='" + patientName + '\'' +
-                ", appointmentId=" + appointmentId +
-                ", medication='" + medication + '\'' +
-                ", dosage='" + dosage + '\'' +
-                ", doctorNotes='" + doctorNotes + '\'' +
-                '}';
     }
 }

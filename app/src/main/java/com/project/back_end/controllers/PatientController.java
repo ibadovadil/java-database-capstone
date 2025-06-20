@@ -4,106 +4,100 @@ import com.project.back_end.DTO.Login;
 import com.project.back_end.models.Patient;
 import com.project.back_end.services.AppService;
 import com.project.back_end.services.PatientService;
+import jakarta.validation.Valid;
+import java.util.HashMap;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import jakarta.validation.Valid;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/patient")
 public class PatientController {
 
     private final PatientService patientService;
-    private final AppService appService;
+    private final AppService service;
 
     @Autowired
-    public PatientController(PatientService patientService, AppService appService) {
+    public PatientController(PatientService patientService, AppService service) {
         this.patientService = patientService;
-        this.appService = appService;
+        this.service = service;
     }
 
     @GetMapping("/{token}")
-    public ResponseEntity<Map<String, Object>> getPatientDetails(@PathVariable String token) {
-        Map<String, Object> response = new HashMap<>();
-
-        Map<String, String> validationErrors = appService.validateToken(token, "patient").getBody();
-        if (!validationErrors.isEmpty()) {
-            response.put("message", validationErrors.get("error"));
-            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+    public ResponseEntity<Map<String, Object>> getPatient(@PathVariable String token) {
+        Map<String, Object> map = new HashMap<>();
+        ResponseEntity<Map<String, String>> tempMap = service.validateToken(
+                token,
+                "patient"
+        );
+        if (!tempMap.getBody().isEmpty()) {
+            map.putAll(tempMap.getBody());
+            return new ResponseEntity<>(map, tempMap.getStatusCode());
         }
-
         return patientService.getPatientDetails(token);
     }
 
-    @PostMapping
-    public ResponseEntity<Map<String, String>> createPatient(@RequestBody @Valid Patient patient) {
-        Map<String, String> response = new HashMap<>();
-        try {
-            boolean isValidPatient = appService.validatePatient(patient);
-
-            if (!isValidPatient) {
-                response.put("message", "Patient with this email or phone number already exists.");
-                return new ResponseEntity<>(response, HttpStatus.CONFLICT);
-            }
-
+    @PostMapping()
+    public ResponseEntity<Map<String, String>> createPatient(
+            @RequestBody @Valid Patient patient
+    ) {
+        Map<String, String> map = new HashMap<>();
+        if (service.validatePatient(patient)) {
             int result = patientService.createPatient(patient);
             if (result == 1) {
-                response.put("message", "Signup successful.");
-                return new ResponseEntity<>(response, HttpStatus.CREATED);
-            } else {
-                response.put("message", "Internal server error occurred during signup.");
-                return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+                map.put("message", "Signup successful.");
+                return ResponseEntity.status(HttpStatus.CREATED).body(map);
             }
-        } catch (Exception e) {
-            System.err.println("Error creating patient: " + e.getMessage());
-            response.put("message", "Internal server error: " + e.getMessage());
-            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            if (result == 0) {
+                map.put("message", "Internal server error.");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(map);
+            }
         }
+        map.put("message", "Patient with this email or phone number already exists.");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> patientLogin(@RequestBody @Valid Login login) {
-        return appService.validatePatientLogin(login);
+    public ResponseEntity<Map<String, String>> login(@RequestBody Login login) {
+        return service.validatePatientLogin(login);
     }
 
-    @GetMapping("/{id}/appointments/{token}")
-    public ResponseEntity<Map<String, Object>> getPatientAppointments(
+    @GetMapping("/{id}/{user}/{token}")
+    public ResponseEntity<Map<String, Object>> getPatientAppointment(
             @PathVariable Long id,
-            @PathVariable String token) {
-
-        Map<String, Object> response = new HashMap<>();
-
-        Map<String, String> validationErrors = appService.validateToken(token, "patient").getBody();
-        if (!validationErrors.isEmpty()) {
-            response.put("message", validationErrors.get("error"));
-            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+            @PathVariable String token,
+            @PathVariable String user
+    ) {
+        Map<String, Object> map = new HashMap<>();
+        ResponseEntity<Map<String, String>> tempMap = service.validateToken(
+                token,
+                user
+        );
+        if (!tempMap.getBody().isEmpty()) {
+            map.putAll(tempMap.getBody());
+            return new ResponseEntity<>(map, tempMap.getStatusCode());
         }
 
         return patientService.getPatientAppointment(id, token);
     }
 
     @GetMapping("/filter/{condition}/{name}/{token}")
-    public ResponseEntity<Map<String, Object>> filterPatientAppointments(
+    public ResponseEntity<Map<String, Object>> filterPatientAppointment(
             @PathVariable String condition,
-            @PathVariable(required = false) String name,
-            @PathVariable String token) {
-
-        Map<String, Object> response = new HashMap<>();
-
-        Map<String, String> validationErrors = appService.validateToken(token, "patient").getBody();
-        if (!validationErrors.isEmpty()) {
-            response.put("message", validationErrors.get("error"));
-            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+            @PathVariable String name,
+            @PathVariable String token
+    ) {
+        Map<String, Object> map = new HashMap<>();
+        ResponseEntity<Map<String, String>> tempMap = service.validateToken(
+                token,
+                "patient"
+        );
+        if (!tempMap.getBody().isEmpty()) {
+            map.putAll(tempMap.getBody());
+            return new ResponseEntity<>(map, tempMap.getStatusCode());
         }
-
-        String filterName = (name != null && !name.equalsIgnoreCase("null")) ? name : null;
-
-        return appService.filterPatient(condition, filterName, token);
+        return service.filterPatient(condition, name, token);
     }
 }
